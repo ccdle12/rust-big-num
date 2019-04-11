@@ -1,23 +1,31 @@
 const RADIX: u32 = 10;
 
 struct BigNum {
-    num: Vec<u32>,
+    num: Vec<i8>,
 }
 
 impl BigNum {
     pub fn from_dec_str(input: &str) -> BigNum {
-        let num = input.chars().map(|x| x.to_digit(RADIX).unwrap()).collect();
+        let num = input
+            .chars()
+            .map(|x| x.to_digit(RADIX).unwrap() as i8)
+            .collect();
+
         BigNum { num }
     }
 
     // TEMP:
     pub fn add(&mut self, input: &str) {
-        let other: Vec<u32> = input.chars().map(|x| x.to_digit(RADIX).unwrap()).collect();
-        let mut result: Vec<u32> = vec![];
+        let other: Vec<i8> = input
+            .chars()
+            .map(|x| x.to_digit(RADIX).unwrap() as i8)
+            .collect();
+
+        let mut result: Vec<i8> = vec![];
         let mut carry = 0;
 
-        let bigger: &Vec<u32>;
-        let smaller: &Vec<u32>;
+        let bigger: &Vec<i8>;
+        let smaller: &Vec<i8>;
 
         if self.num.len() > other.len() {
             bigger = &self.num;
@@ -28,13 +36,13 @@ impl BigNum {
         }
 
         // Obviously bigger and smaller numbers will have a different last index.
-        let mut i = smaller.len() - 1;
+        let mut small_index = smaller.len() - 1;
         let mut big_index = bigger.len() - 1;
 
         // Decrement both indexes but will stop when we reach the end of the
         // smaller number.
         loop {
-            let mut r = (bigger[big_index] + smaller[i]) + carry;
+            let mut r = (bigger[big_index] + smaller[small_index]) + carry;
             carry = 0;
             if r >= 10 {
                 carry = r / 10;
@@ -44,11 +52,11 @@ impl BigNum {
             result.insert(0 as usize, r);
 
             // Once we've reached the zero index of the smaller number, break.
-            if i == 0 {
+            if small_index == 0 {
                 break;
             }
 
-            i -= 1;
+            small_index -= 1;
             big_index -= 1;
         }
 
@@ -77,8 +85,7 @@ impl BigNum {
 
     // TEMP:
     pub fn to_string(&self) -> String {
-        let result = self.num.iter().map(|x| x.to_string()).collect();
-        result
+        self.num.iter().map(|x| x.to_string()).collect()
     }
 }
 
