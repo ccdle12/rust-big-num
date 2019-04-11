@@ -4,8 +4,8 @@ use std::ops::Add;
 /// Radix is a constant used as the base for string number conversion.
 const RADIX: u32 = 10;
 
-/// BigNum is the object that will contain arithmetic operations for Big Numbers.
-struct BigNum {
+/// BigNum holds a Vec<i8> representing a Big Number.
+pub struct BigNum {
     num: Vec<i8>,
 }
 
