@@ -1,12 +1,16 @@
+use std::fmt;
 use std::ops::Add;
 
+/// Radix is a constant used as the base for string number conversion.
 const RADIX: u32 = 10;
 
+/// BigNum is the object that will contain arithmetic operations for Big Numbers.
 struct BigNum {
     num: Vec<i8>,
 }
 
 impl BigNum {
+    /// Takes a decimal string representation, parses and returns as a BigNum.
     pub fn from_dec_str(input: &str) -> BigNum {
         let num = input
             .chars()
@@ -15,10 +19,13 @@ impl BigNum {
 
         BigNum { num }
     }
+}
 
-    // TEMP:
-    pub fn to_string(&self) -> String {
-        self.num.iter().map(|x| x.to_string()).collect()
+impl fmt::Display for BigNum {
+    // fmt implements to_string() for BigNum.
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let num_str: String = self.num.iter().map(|x| x.to_string()).collect();
+        write!(f, "{}", num_str)
     }
 }
 
