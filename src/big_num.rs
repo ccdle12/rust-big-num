@@ -1,3 +1,5 @@
+use std::ops::Add;
+
 const RADIX: u32 = 10;
 
 struct BigNum {
@@ -15,23 +17,27 @@ impl BigNum {
     }
 
     // TEMP:
-    pub fn add(&mut self, input: &str) {
-        let other: Vec<i8> = input
-            .chars()
-            .map(|x| x.to_digit(RADIX).unwrap() as i8)
-            .collect();
+    pub fn to_string(&self) -> String {
+        self.num.iter().map(|x| x.to_string()).collect()
+    }
+}
 
+impl Add for BigNum {
+    type Output = BigNum;
+
+    // TODO: Needs refactoring.
+    fn add(self, other: BigNum) -> BigNum {
         let mut result: Vec<i8> = vec![];
         let mut carry = 0;
 
         let bigger: &Vec<i8>;
         let smaller: &Vec<i8>;
 
-        if self.num.len() > other.len() {
+        if self.num.len() > other.num.len() {
             bigger = &self.num;
-            smaller = &other;
+            smaller = &other.num;
         } else {
-            bigger = &other;
+            bigger = &other.num;
             smaller = &self.num;
         }
 
@@ -80,12 +86,7 @@ impl BigNum {
             result.insert(0 as usize, carry);
         }
 
-        self.num = result;
-    }
-
-    // TEMP:
-    pub fn to_string(&self) -> String {
-        self.num.iter().map(|x| x.to_string()).collect()
+        BigNum { num: result }
     }
 }
 
@@ -95,54 +96,51 @@ mod tests {
 
     #[test]
     fn simple_add_1() {
-        let mut num = BigNum::from_dec_str("149");
-        num.add("1");
+        let x = BigNum::from_dec_str("149");
+        let y = BigNum::from_dec_str("1");
+        let result = x + y;
 
-        assert_eq!(num.to_string(), "150");
+        assert_eq!(result.to_string(), "150");
     }
 
     #[test]
     fn simple_add_2() {
-        let mut num = BigNum::from_dec_str("149");
-        num.add("320");
+        let x = BigNum::from_dec_str("149");
+        let y = BigNum::from_dec_str("320");
+        let result = x + y;
 
-        assert_eq!(num.to_string(), "469");
+        assert_eq!(result.to_string(), "469");
     }
 
     #[test]
     fn simple_add_3() {
-        let mut num = BigNum::from_dec_str("4362911");
-        num.add("9732360");
+        let x = BigNum::from_dec_str("4362911");
+        let y = BigNum::from_dec_str("9732360");
+        let result = x + y;
 
-        assert_eq!(num.to_string(), "14095271");
-    }
-
-    #[test]
-    fn simple_add_4() {
-        let mut num = BigNum::from_dec_str("4362911");
-        num.add("9732360");
-
-        assert_eq!(num.to_string(), "14095271");
+        assert_eq!(result.to_string(), "14095271");
     }
 
     #[test]
     fn big_numbers_add_1() {
-        let mut num = BigNum::from_dec_str("1437693012945712340532450954326891");
-        num.add("23948324543257904183523168231945698423765234");
+        let x = BigNum::from_dec_str("1437693012945712340532450954326891");
+        let y = BigNum::from_dec_str("23948324543257904183523168231945698423765234");
+        let result = x + y;
 
         assert_eq!(
-            num.to_string(),
+            result.to_string(),
             "23948324544695597196468880572478149378092125"
         )
     }
 
     #[test]
     fn big_numbers_add_2() {
-        let mut num = BigNum::from_dec_str("132593257943285632497568497562319847013298473190285691205710294310234981024823104984326234523142354326");
-        num.add("4835743185712987423498564329587312094803981759438257493257943085012394831902473295632975643829765987439210847319028471398471234");
+        let x = BigNum::from_dec_str("132593257943285632497568497562319847013298473190285691205710294310234981024823104984326234523142354326");
+        let y = BigNum::from_dec_str("4835743185712987423498564329587312094803981759438257493257943085012394831902473295632975643829765987439210847319028471398471234");
+        let result = x + y;
 
         assert_eq!(
-            num.to_string(),
+            result.to_string(),
             "4835743185712987423498564462180570038089614257006755055577790098310868022188164501343269954064747012262315831645262994540825560"
         )
     }
