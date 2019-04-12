@@ -79,6 +79,17 @@ impl Add for BigNum {
             result.push(carry)
         }
 
+        // TEMP: clear any leading zeroes.
+        // This is a preferrable to using since calling iter().rev(), we will
+        // be unable to use a mutable and immutable reference together.
+        for i in (0..result.len()).rev() {
+            if result[i] == 0 {
+                result.remove(i);
+            } else {
+                break;
+            }
+        }
+
         BigNum { num: result }
     }
 }
@@ -136,5 +147,14 @@ mod tests {
             result.to_string(),
             "4835743185712987423498564462180570038089614257006755055577790098310868022188164501343269954064747012262315831645262994540825560"
         )
+    }
+
+    #[test]
+    fn leading_zeros_1() {
+        let x = BigNum::from_dec_str("0000000000000000000023");
+        let y = BigNum::from_dec_str("02");
+        let result = x + y;
+
+        assert_eq!(result.to_string(), "25");
     }
 }
