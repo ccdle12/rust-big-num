@@ -36,8 +36,7 @@ impl Add for BigNum {
     type Output = BigNum;
 
     // TODO: implement ORD trait, to simply compare min max of BigNum.
-    // Check length of num first, then if equal, sum the num vector and
-    // compare. Summing will be O(n).
+    // Sum the num vector and compare. Summing will be O(n).
     // TODO: Needs refactoring further.
     fn add(self, other: BigNum) -> BigNum {
         let mut result: Vec<i8> = vec![];
