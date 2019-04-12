@@ -12,19 +12,22 @@ pub struct BigNum {
 impl BigNum {
     /// Takes a decimal string representation, parses and returns as a BigNum.
     pub fn from_dec_str(input: &str) -> BigNum {
-        let num = input
+        let mut num: Vec<i8> = input
             .chars()
             .map(|x| x.to_digit(RADIX).unwrap() as i8)
             .collect();
+
+        // Num is stored in reverse order *little endian*, easier for arithmetic.
+        num.reverse();
 
         BigNum { num }
     }
 }
 
 impl fmt::Display for BigNum {
-    // fmt implements to_string() for BigNum.
+    // fmt::Display implements to_string() for BigNum.
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let num_str: String = self.num.iter().map(|x| x.to_string()).collect();
+        let num_str: String = self.num.iter().map(|x| x.to_string()).rev().collect();
         write!(f, "{}", num_str)
     }
 }
@@ -32,65 +35,48 @@ impl fmt::Display for BigNum {
 impl Add for BigNum {
     type Output = BigNum;
 
-    // TODO: Needs refactoring.
+    // TODO: implement ORD trait, to simply compare min max of BigNum.
+    // Check length of num first, then if equal, sum the num vector and
+    // compare. Summing will be O(n).
+    // TODO: Needs refactoring further.
     fn add(self, other: BigNum) -> BigNum {
         let mut result: Vec<i8> = vec![];
-        let mut carry = 0;
 
-        let bigger: &Vec<i8>;
-        let smaller: &Vec<i8>;
-
+        // TODO: Gross.
+        // Use the trait ORD to make min, max comparisons.
+        let big: &Vec<i8>;
+        let small: &Vec<i8>;
         if self.num.len() > other.num.len() {
-            bigger = &self.num;
-            smaller = &other.num;
+            big = &self.num;
+            small = &other.num;
         } else {
-            bigger = &other.num;
-            smaller = &self.num;
+            big = &other.num;
+            small = &self.num;
         }
 
-        // Obviously bigger and smaller numbers will have a different last index.
-        let mut small_index = smaller.len() - 1;
-        let mut big_index = bigger.len() - 1;
-
-        // Decrement both indexes but will stop when we reach the end of the
-        // smaller number.
-        loop {
-            let mut r = (bigger[big_index] + smaller[small_index]) + carry;
+        // Iterate and calculate addition for all of i8s in small.
+        let mut carry = 0;
+        for i in 0..small.len() {
+            let mut r = (big[i] + small[i]) + carry;
             carry = 0;
+
             if r >= 10 {
                 carry = 1;
                 r = r - 10;
             }
 
-            result.insert(0 as usize, r);
-
-            // Once we've reached the zero index of the smaller number, break.
-            if small_index == 0 {
-                break;
-            }
-
-            small_index -= 1;
-            big_index -= 1;
+            result.push(r);
         }
 
-        // Calculate the difference in size between the two numbers and start
-        // decrementing the bigger number from the difference.
-        let mut diff: isize = (bigger.len() as isize - smaller.len() as isize) - 1;
-        if diff > 0 {
-            loop {
-                result.insert(0 as usize, bigger[diff as usize] + carry);
-                carry = 0;
-
-                if diff == 0 {
-                    break;
-                }
-                diff -= 1;
-            }
+        // Add the rest if there is a difference between small and big.
+        for i in small.len()..big.len() {
+            result.push(big[i] + carry);
+            carry = 0;
         }
 
-        // Add any left over carries.
+        // Catch any left over carry.
         if carry > 0 {
-            result.insert(0 as usize, carry);
+            result.push(carry)
         }
 
         BigNum { num: result }
