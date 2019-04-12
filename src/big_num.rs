@@ -58,7 +58,7 @@ impl Add for BigNum {
             let mut r = (bigger[big_index] + smaller[small_index]) + carry;
             carry = 0;
             if r >= 10 {
-                carry = r / 10;
+                carry = 1;
                 r = r - 10;
             }
 
