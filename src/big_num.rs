@@ -48,8 +48,8 @@ impl BigNum {
 
     /// A helper function to remove any leading zeroes from a num.
     fn remove_leading_zeroes(&self, num: &mut BigDigit) {
-        // This is a preferrable to using since calling iter().rev(), we will
-        // be unable to use a mutable and immutable reference together.
+        // This is a preferrable to using iter().rev(), since we will be unable
+        // to use a mutable and immutable reference together.
         for i in (0..num.len()).rev() {
             if num[i] == 0 {
                 num.remove(i);
