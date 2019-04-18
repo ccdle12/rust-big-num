@@ -1,20 +1,47 @@
+use std::cmp::Ordering::{self, Equal};
+use rand::RngCore;
 use std::fmt;
 use std::ops::Add;
+use crate::helper::{BigDigit, compare_num};
 
 /// Radix is a constant used as the base for string number conversion.
 const RADIX: u32 = 10;
 
+
 /// BigNum holds a Vec<i8> representing a Big Number.
+#[derive(Eq, Debug)]
 pub struct BigNum {
-    num: Vec<i8>,
+    num: BigDigit,
+}
+
+// Implement Ordering for comparisons of BigNum.
+impl Ord for BigNum {
+  fn cmp(&self, other: &BigNum) -> Ordering {
+    compare_num(&self.num, &other.num)
+  }
+}
+
+impl PartialOrd for BigNum {
+    fn partial_cmp(&self, other: &BigNum) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+impl PartialEq for BigNum {
+    fn eq(&self, other: &BigNum) -> bool {
+        match self.cmp(&other) {
+          Equal => true,
+          _ => false,
+        }
+    }
 }
 
 impl BigNum {
     /// Takes a decimal string representation, parses and returns as a BigNum.
     pub fn from_dec_str(input: &str) -> BigNum {
-        let mut num: Vec<i8> = input
+        let mut num: BigDigit = input
             .chars()
-            .map(|x| x.to_digit(RADIX).unwrap() as i8)
+            .map(|x| x.to_digit(RADIX).unwrap() as u8)
             .collect();
 
         // Num is stored in reverse order *little endian*, easier for arithmetic.
@@ -22,10 +49,31 @@ impl BigNum {
 
         BigNum { num }
     }
+
+    /// A helper function to remove any leading zeroes from a num.
+    fn remove_leading_zeroes(&self, num: &mut BigDigit) {
+        // This is a preferrable to using since calling iter().rev(), we will
+        // be unable to use a mutable and immutable reference together.
+        for i in (0..num.len()).rev() {
+            if num[i] == 0 {
+                num.remove(i);
+            } else {
+                break;
+            }
+        }
+    }
+
+    /// Random number.
+    pub fn generate_rand_num() -> BigNum {
+        let mut num = vec![0u8; 32];
+        rand::thread_rng().fill_bytes(&mut num);
+
+        BigNum { num }
+    }
 }
 
+// fmt::Display implements to_string() for BigNum.
 impl fmt::Display for BigNum {
-    // fmt::Display implements to_string() for BigNum.
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let num_str: String = self.num.iter().map(|x| x.to_string()).rev().collect();
         write!(f, "{}", num_str)
@@ -39,12 +87,12 @@ impl Add for BigNum {
     // Sum the num vector and compare. Summing will be O(n).
     // TODO: Needs refactoring further.
     fn add(self, other: BigNum) -> BigNum {
-        let mut result: Vec<i8> = vec![];
+        let mut result: BigDigit = vec![];
 
         // TODO: Gross.
         // Use the trait ORD to make min, max comparisons.
-        let big: &Vec<i8>;
-        let small: &Vec<i8>;
+        let big: &BigDigit;
+        let small: &BigDigit;
         if self.num.len() > other.num.len() {
             big = &self.num;
             small = &other.num;
@@ -78,23 +126,15 @@ impl Add for BigNum {
             result.push(carry)
         }
 
-        // TEMP: clear any leading zeroes.
-        // This is a preferrable to using since calling iter().rev(), we will
-        // be unable to use a mutable and immutable reference together.
-        for i in (0..result.len()).rev() {
-            if result[i] == 0 {
-                result.remove(i);
-            } else {
-                break;
-            }
-        }
+        // Clear any leading zeroes.
+        self.remove_leading_zeroes(&mut result);
 
         BigNum { num: result }
     }
 }
 
 #[cfg(test)]
-mod tests {
+mod addition_tests {
     use super::*;
 
     #[test]
@@ -155,5 +195,63 @@ mod tests {
         let result = x + y;
 
         assert_eq!(result.to_string(), "25");
+    }
+
+    #[test]
+    fn leading_zeros_2() {
+        let x = BigNum::from_dec_str("0000000000000000000000000000000023");
+        let y = BigNum::from_dec_str("3219857349857439285798234981234809231850192485043985034295804329579083415710932857109485430925709128430219473210985732190857213908473092874039218470139284710923472310948");
+        let result = x + y;
+
+        assert_eq!(
+            result.to_string(), 
+            "3219857349857439285798234981234809231850192485043985034295804329579083415710932857109485430925709128430219473210985732190857213908473092874039218470139284710923472310971"
+        );
+    }
+
+}
+
+#[cfg(test)]
+mod comparison_tests {
+    use super::*;
+
+    #[test]
+    fn compare_1() {
+       let x = BigNum::from_dec_str("132593257943285632497568497562319847013298473190285691205710294310234981024823104984326234523142354326");
+       let y = BigNum::from_dec_str("4835743185712987423498564329587312094803981759438257493257943085012394831902473295632975643829765987439210847319028471398471234");
+
+       assert!(x < y);
+       assert!(y > x);
+       assert!(x != y);
+    }
+
+    #[test]
+    fn compare_2() {
+       let x = BigNum::from_dec_str("45");
+       let y = BigNum::from_dec_str("52");
+
+       assert!(x < y);
+       assert!(y > x);
+       assert!(y != x);
+    }
+
+    #[test]
+    fn compare_3() {
+      let x = BigNum::from_dec_str("132598123512354");
+      let y = BigNum::from_dec_str("132598123512354");
+
+      assert_eq!(x, y);
+      assert!(x == y);
+    }
+}
+
+#[cfg(test)]
+mod random_number_tests {
+    use super::*;
+
+    #[test]
+    fn generate_random_number() {
+        let x = BigNum::generate_rand_num();
+        println!("random number: {}", x);
     }
 }
