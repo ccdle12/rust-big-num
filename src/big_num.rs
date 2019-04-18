@@ -251,12 +251,20 @@ mod random_number_tests {
     use super::*;
 
     #[test]
-    fn generate_random_number() {
+    fn generate_random_number_1() {
         let x = BigNum::from_dec_str("42");
         let y = BigNum::gen_rand_num_below(&x);
 
         println!("x: {}", x);
         println!("y: {}", y);
+
+        assert!(y < x);
+    }
+
+    #[test]
+    fn generate_random_number_2() {
+        let x = BigNum::from_dec_str("132593257943285632497568497562319847013298473190285691205710294310234981024823104984326234523142354326");
+        let y = BigNum::gen_rand_num_below(&x);
 
         assert!(y < x);
     }
