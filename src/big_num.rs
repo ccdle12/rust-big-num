@@ -2,11 +2,7 @@ use std::cmp::Ordering::{self, Equal};
 use rand::RngCore;
 use std::fmt;
 use std::ops::Add;
-use crate::helper::{BigDigit, compare_num};
-
-/// Radix is a constant used as the base for string number conversion.
-const RADIX: u32 = 10;
-
+use crate::helper::{BigDigit, compare_num, RADIX};
 
 /// BigNum holds a Vec<i8> representing a Big Number.
 #[derive(Eq, Debug)]

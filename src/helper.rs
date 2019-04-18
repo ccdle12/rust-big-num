@@ -4,6 +4,9 @@ use std::cmp::Ordering::{self, Equal, Greater, Less};
 /// bytes.
 pub type BigDigit = Vec<u8>;
 
+/// Radix is a constant used as the base for string number conversion.
+pub const RADIX: u32 = 10;
+
 /// compare_num is used to compare the BigDigit of each BigNum and return an
 /// enum of Ordering. This is primarily used in the Ord trait implementation.
 pub fn compare_num(x: &BigDigit, y: &BigDigit) -> Ordering {
