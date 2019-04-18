@@ -1,4 +1,5 @@
 use std::cmp::Ordering::{self, Equal};
+use std::cmp;
 use rand::RngCore;
 use std::fmt;
 use std::ops::Add;
@@ -79,28 +80,16 @@ impl fmt::Display for BigNum {
 impl Add for BigNum {
     type Output = BigNum;
 
-    // TODO: implement ORD trait, to simply compare min max of BigNum.
-    // Sum the num vector and compare. Summing will be O(n).
-    // TODO: Needs refactoring further.
     fn add(self, other: BigNum) -> BigNum {
         let mut result: BigDigit = vec![];
 
-        // TODO: Gross.
-        // Use the trait ORD to make min, max comparisons.
-        let big: &BigDigit;
-        let small: &BigDigit;
-        if self.num.len() > other.num.len() {
-            big = &self.num;
-            small = &other.num;
-        } else {
-            big = &other.num;
-            small = &self.num;
-        }
+        let big = cmp::max(&self, &other);
+        let small = cmp::min(&self, &other); 
 
         // Iterate and calculate addition for all of i8s in small.
         let mut carry = 0;
-        for i in 0..small.len() {
-            let mut r = (big[i] + small[i]) + carry;
+        for i in 0..small.num.len() {
+            let mut r = (big.num[i] + small.num[i]) + carry;
             carry = 0;
 
             if r >= 10 {
@@ -112,8 +101,8 @@ impl Add for BigNum {
         }
 
         // Add the rest if there is a difference between small and big.
-        for i in small.len()..big.len() {
-            result.push(big[i] + carry);
+        for i in small.num.len()..big.num.len() {
+            result.push(big.num[i] + carry);
             carry = 0;
         }
 
@@ -238,6 +227,15 @@ mod comparison_tests {
 
       assert_eq!(x, y);
       assert!(x == y);
+    }
+
+    #[test]
+    fn compare_4() {
+       let x = BigNum::from_dec_str("132593257943285632497568497562319847013298473190285691205710294310234981024823104984326234523142354326");
+       let y = BigNum::from_dec_str("4835743185712987423498564329587312094803981759438257493257943085012394831902473295632975643829765987439210847319028471398471234");
+
+       assert_eq!(cmp::max(&x, &y), &y);
+       assert_eq!(cmp::min(&x, &y), &x);
     }
 }
 
