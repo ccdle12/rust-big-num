@@ -1,11 +1,11 @@
-use std::cmp::Ordering::{self, Equal};
-use std::cmp;
+use crate::helper::{compare_num, remove_leading_zeroes, BigDigit, RADIX};
 use rand::RngCore;
+use std::cmp;
+use std::cmp::Ordering::{self, Equal};
 use std::fmt;
 use std::ops::Add;
-use crate::helper::{BigDigit, compare_num, RADIX, remove_leading_zeroes};
 
-/// BigNum holds a Vec<i8> representing a Big Number.
+/// BigNum holds a BigDigit (Vec) of bytes that represent a big number.
 #[derive(Eq, Debug)]
 pub struct BigNum {
     num: BigDigit,
@@ -13,9 +13,9 @@ pub struct BigNum {
 
 // Implement Ordering for comparisons of BigNum.
 impl Ord for BigNum {
-  fn cmp(&self, other: &BigNum) -> Ordering {
-    compare_num(&self.num, &other.num)
-  }
+    fn cmp(&self, other: &BigNum) -> Ordering {
+        compare_num(&self.num, &other.num)
+    }
 }
 
 impl PartialOrd for BigNum {
@@ -27,8 +27,8 @@ impl PartialOrd for BigNum {
 impl PartialEq for BigNum {
     fn eq(&self, other: &BigNum) -> bool {
         match self.cmp(&other) {
-          Equal => true,
-          _ => false,
+            Equal => true,
+            _ => false,
         }
     }
 }
@@ -46,7 +46,6 @@ impl BigNum {
 
         BigNum { num }
     }
-
 
     /// Random number.
     pub fn generate_rand_num() -> BigNum {
@@ -72,7 +71,7 @@ impl Add for BigNum {
         let mut result: BigDigit = vec![];
 
         let big = cmp::max(&self, &other);
-        let small = cmp::min(&self, &other); 
+        let small = cmp::min(&self, &other);
 
         // Iterate and calculate addition for all of i8s in small.
         let mut carry = 0;
@@ -177,7 +176,7 @@ mod addition_tests {
         let result = x + y;
 
         assert_eq!(
-            result.to_string(), 
+            result.to_string(),
             "3219857349857439285798234981234809231850192485043985034295804329579083415710932857109485430925709128430219473210985732190857213908473092874039218470139284710923472310971"
         );
     }
@@ -190,40 +189,40 @@ mod comparison_tests {
 
     #[test]
     fn compare_1() {
-       let x = BigNum::from_dec_str("132593257943285632497568497562319847013298473190285691205710294310234981024823104984326234523142354326");
-       let y = BigNum::from_dec_str("4835743185712987423498564329587312094803981759438257493257943085012394831902473295632975643829765987439210847319028471398471234");
+        let x = BigNum::from_dec_str("132593257943285632497568497562319847013298473190285691205710294310234981024823104984326234523142354326");
+        let y = BigNum::from_dec_str("4835743185712987423498564329587312094803981759438257493257943085012394831902473295632975643829765987439210847319028471398471234");
 
-       assert!(x < y);
-       assert!(y > x);
-       assert!(x != y);
+        assert!(x < y);
+        assert!(y > x);
+        assert!(x != y);
     }
 
     #[test]
     fn compare_2() {
-       let x = BigNum::from_dec_str("45");
-       let y = BigNum::from_dec_str("52");
+        let x = BigNum::from_dec_str("45");
+        let y = BigNum::from_dec_str("52");
 
-       assert!(x < y);
-       assert!(y > x);
-       assert!(y != x);
+        assert!(x < y);
+        assert!(y > x);
+        assert!(y != x);
     }
 
     #[test]
     fn compare_3() {
-      let x = BigNum::from_dec_str("132598123512354");
-      let y = BigNum::from_dec_str("132598123512354");
+        let x = BigNum::from_dec_str("132598123512354");
+        let y = BigNum::from_dec_str("132598123512354");
 
-      assert_eq!(x, y);
-      assert!(x == y);
+        assert_eq!(x, y);
+        assert!(x == y);
     }
 
     #[test]
     fn compare_4() {
-       let x = BigNum::from_dec_str("132593257943285632497568497562319847013298473190285691205710294310234981024823104984326234523142354326");
-       let y = BigNum::from_dec_str("4835743185712987423498564329587312094803981759438257493257943085012394831902473295632975643829765987439210847319028471398471234");
+        let x = BigNum::from_dec_str("132593257943285632497568497562319847013298473190285691205710294310234981024823104984326234523142354326");
+        let y = BigNum::from_dec_str("4835743185712987423498564329587312094803981759438257493257943085012394831902473295632975643829765987439210847319028471398471234");
 
-       assert_eq!(cmp::max(&x, &y), &y);
-       assert_eq!(cmp::min(&x, &y), &x);
+        assert_eq!(cmp::max(&x, &y), &y);
+        assert_eq!(cmp::min(&x, &y), &x);
     }
 }
 
