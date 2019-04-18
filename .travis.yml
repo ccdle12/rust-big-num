@@ -1,10 +1,4 @@
-sduo: required
-
 language: rust
-
-services: 
-
-before_script:
-  
 script:
-  - cargo test
+  - cargo build --verbose --all
+  - cargo test  --verbose --all
