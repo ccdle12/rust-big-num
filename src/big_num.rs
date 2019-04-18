@@ -3,7 +3,7 @@ use std::cmp;
 use rand::RngCore;
 use std::fmt;
 use std::ops::Add;
-use crate::helper::{BigDigit, compare_num, RADIX};
+use crate::helper::{BigDigit, compare_num, RADIX, remove_leading_zeroes};
 
 /// BigNum holds a Vec<i8> representing a Big Number.
 #[derive(Eq, Debug)]
@@ -47,18 +47,6 @@ impl BigNum {
         BigNum { num }
     }
 
-    /// A helper function to remove any leading zeroes from a num.
-    fn remove_leading_zeroes(&self, num: &mut BigDigit) {
-        // This is a preferrable to using iter().rev(), since we will be unable
-        // to use a mutable and immutable reference together.
-        for i in (0..num.len()).rev() {
-            if num[i] == 0 {
-                num.remove(i);
-            } else {
-                break;
-            }
-        }
-    }
 
     /// Random number.
     pub fn generate_rand_num() -> BigNum {
@@ -112,7 +100,7 @@ impl Add for BigNum {
         }
 
         // Clear any leading zeroes.
-        self.remove_leading_zeroes(&mut result);
+        remove_leading_zeroes(&mut result);
 
         BigNum { num: result }
     }

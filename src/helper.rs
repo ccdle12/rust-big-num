@@ -32,3 +32,16 @@ pub fn compare_num(x: &BigDigit, y: &BigDigit) -> Ordering {
 
     Equal
 }
+
+/// A helper function to remove any leading zeroes from a BigDigit.
+pub fn remove_leading_zeroes(num: &mut BigDigit) {
+    // This is a preferrable to using iter().rev(), since we will be unable
+    // to use a mutable and immutable reference together.
+    for i in (0..num.len()).rev() {
+        if num[i] == 0 {
+            num.remove(i);
+        } else {
+            break;
+        }
+    }
+}
