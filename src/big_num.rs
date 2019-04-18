@@ -1,4 +1,5 @@
 use crate::helper::{compare_num, remove_leading_zeroes, BigDigit, RADIX};
+use rand::Rng;
 use rand::RngCore;
 use std::cmp;
 use std::cmp::Ordering::{self, Equal};
@@ -47,12 +48,24 @@ impl BigNum {
         BigNum { num }
     }
 
-    /// Random number.
-    pub fn generate_rand_num() -> BigNum {
-        let mut num = vec![0u8; 32];
-        rand::thread_rng().fill_bytes(&mut num);
+    /// WARNING! Very basic naive random number generator below a given big
+    /// number.
+    pub fn gen_rand_num_below(target: &BigNum) -> BigNum {
+        loop {
+            let mut num = vec![0; target.num.len()];
 
-        BigNum { num }
+            for i in 0..num.len() {
+                num[i] = rand::thread_rng().gen_range(0, 10);
+            }
+
+            let mut below_num = BigNum { num };
+
+            remove_leading_zeroes(&mut below_num.num);
+
+            if below_num < *target {
+                return below_num;
+            }
+        }
     }
 }
 
@@ -224,6 +237,14 @@ mod comparison_tests {
         assert_eq!(cmp::max(&x, &y), &y);
         assert_eq!(cmp::min(&x, &y), &x);
     }
+
+    #[test]
+    fn compare_5() {
+        let x = BigNum::from_dec_str("42");
+        let y = BigNum::from_dec_str("229");
+
+        assert!(x < y);
+    }
 }
 
 #[cfg(test)]
@@ -232,7 +253,12 @@ mod random_number_tests {
 
     #[test]
     fn generate_random_number() {
-        let x = BigNum::generate_rand_num();
-        println!("random number: {}", x);
+        let x = BigNum::from_dec_str("42");
+        let y = BigNum::gen_rand_num_below(&x);
+
+        println!("x: {}", x);
+        println!("y: {}", y);
+
+        assert!(y < x);
     }
 }
