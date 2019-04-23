@@ -155,14 +155,6 @@ impl Sub for BigNum {
                 continue;
             }
 
-            // If there is a carry, use it to calculate the column result.
-            // if carry > 0 {
-            //     column_result = (minuend - addend) - carry;
-            //     result.push(column_result);
-            //     carry = 0;
-            //     continue;
-            // }
-
             // Result at column.
             if carry > 0 {
                 column_result = (minuend - addend) - carry;
