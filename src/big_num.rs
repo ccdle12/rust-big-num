@@ -3,7 +3,7 @@ use rand::Rng;
 use std::cmp;
 use std::cmp::Ordering::{self, Equal};
 use std::fmt;
-use std::ops::Add;
+use std::ops::{Add, Sub};
 
 /// BigNum holds a BigDigit (Vec) of bytes that represent a big number.
 #[derive(Eq, Debug)]
@@ -117,6 +117,75 @@ impl Add for BigNum {
     }
 }
 
+impl Sub for BigNum {
+    type Output = BigNum;
+
+    fn sub(self, other: BigNum) -> BigNum {
+        let mut result: BigDigit = vec![];
+        let mut carry = 0;
+
+        let big = cmp::max(&self, &other);
+        let small = cmp::min(&self, &other);
+
+        for i in 0..small.num.len() {
+            // Assign the each number as minuend (a), added (b) == a - b = r.
+            let mut minuend = self.num[i as usize];
+            let addend = other.num[i as usize];
+
+            // The result at each column of subtraction.
+            // E.g. 150 - 33:
+            //  150
+            // - 33
+            // ----
+            //  127
+            let mut column_result = 0;
+
+            if minuend < addend && carry > 0 {
+                minuend += 10;
+                result.push((minuend - addend) - carry);
+                // carry = 1;
+                continue;
+            }
+
+            // Add 10 to enable subtraction of a lower value.
+            if minuend < addend {
+                minuend += 10;
+                carry = 1;
+                result.push(minuend - addend);
+                continue;
+            }
+
+            // If there is a carry, use it to calculate the column result.
+            // if carry > 0 {
+            //     column_result = (minuend - addend) - carry;
+            //     result.push(column_result);
+            //     carry = 0;
+            //     continue;
+            // }
+
+            // Result at column.
+            if carry > 0 {
+                column_result = (minuend - addend) - carry;
+            } else {
+                column_result = minuend - addend;
+            }
+
+            result.push(column_result);
+            carry = 0;
+        }
+
+        // Sub the rest if there is a difference between small and big.
+        for i in small.num.len()..big.num.len() {
+            result.push(big.num[i] - carry);
+            carry = 0;
+        }
+
+        remove_leading_zeroes(&mut result);
+
+        BigNum { num: result }
+    }
+}
+
 #[cfg(test)]
 mod addition_tests {
     use super::*;
@@ -193,6 +262,57 @@ mod addition_tests {
         );
     }
 
+}
+
+#[cfg(test)]
+mod subtraction_tests {
+    use super::*;
+
+    #[test]
+    fn subtraction_1() {
+        let x = BigNum::from_dec_str("10");
+        let y = BigNum::from_dec_str("2");
+
+        let result = x - y;
+        assert_eq!(result, BigNum::from_dec_str("8"));
+    }
+
+    #[test]
+    fn subtraction_2() {
+        let x = BigNum::from_dec_str("150");
+        let y = BigNum::from_dec_str("33");
+
+        let result = x - y;
+        assert_eq!(result, BigNum::from_dec_str("117"));
+    }
+
+    #[test]
+    fn subtraction_3() {
+        let x = BigNum::from_dec_str("7");
+        let y = BigNum::from_dec_str("5");
+
+        let result = x - y;
+        assert_eq!(result, BigNum::from_dec_str("2"));
+    }
+
+    #[test]
+    fn subtraction_4() {
+        let x = BigNum::from_dec_str("120");
+        let y = BigNum::from_dec_str("33");
+
+        let result = x - y;
+        assert_eq!(result, BigNum::from_dec_str("87"));
+    }
+
+    // #[test]
+    // fn subtraction_5() {
+    // let x = BigNum::from_dec_str("1238758592436584327503819247913286418235761302847321985648723569230814712309857312958613290846321904872310984732195847389256438275623014781239084731290847");
+    // let y = BigNum::from_dec_str("32481237549385701982745329084730921847193824712385618297563298174321894128356321987409312749031286583721640912387439201865091265019254");
+
+    // let result = x - y;
+
+    // assert_eq!(result, BigNum::from_dec_str("1238758592436584327471338010363900716253015973762591063801529744518429094012294014784291396717965582884901671983164560805534797363235575579373993466271593"));
+    // }
 }
 
 #[cfg(test)]
