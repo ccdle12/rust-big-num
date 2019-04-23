@@ -128,7 +128,7 @@ impl Sub for BigNum {
         let small = cmp::min(&self, &other);
 
         for i in 0..small.num.len() {
-            // Assign the each number as minuend (a), added (b) == a - b = r.
+            // Assign the each number as minuend (m), added (a) == m - a = r.
             let mut minuend = self.num[i as usize];
             let addend = other.num[i as usize];
 
