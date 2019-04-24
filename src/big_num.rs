@@ -128,10 +128,11 @@ impl Sub for BigNum {
         let small = cmp::min(&self, &other);
 
         for i in 0..small.num.len() {
-            // Assign the each number as minuend (m), added (a) == m - a = r.
+            // Assign each number as minuend (m) and added (a) == m - a = r.
             let mut minuend = self.num[i as usize];
             let addend = other.num[i as usize];
 
+            println!("minuend - addend: {} - {}", minuend, addend);
             // The result at each column of subtraction.
             // E.g. 150 - 33:
             //  150
@@ -140,18 +141,25 @@ impl Sub for BigNum {
             //  127
             let mut column_result = 0;
 
+            // If minued is less than addend with no existing carry.
             if minuend < addend && carry > 0 {
                 minuend += 10;
                 result.push((minuend - addend) - carry);
-                carry = 1;
+                continue;
+            }
+
+            // If minued and addend are the same with an existing carry.
+            if minuend == addend && carry > 0 {
+                minuend += 10;
+                result.push((minuend - addend) - carry);
                 continue;
             }
 
             // Add 10 to enable subtraction of a lower value.
             if minuend < addend {
                 minuend += 10;
-                carry = 1;
                 result.push(minuend - addend);
+                carry = 1;
                 continue;
             }
 
@@ -296,7 +304,7 @@ mod subtraction_tests {
         assert_eq!(result, BigNum::from_dec_str("87"));
     }
 
-    // #[test]
+    #[test]
     fn subtraction_5() {
         let x = BigNum::from_dec_str("1238758592436584327503819247913286418235761302847321985648723569230814712309857312958613290846321904872310984732195847389256438275623014781239084731290847");
         let y = BigNum::from_dec_str("32481237549385701982745329084730921847193824712385618297563298174321894128356321987409312749031286583721640912387439201865091265019254");
@@ -304,6 +312,16 @@ mod subtraction_tests {
         let result = x - y;
 
         assert_eq!(result, BigNum::from_dec_str("1238758592436584327471338010363900716253015973762591063801529744518429094012294014784291396717965582884901671983164560805534797363235575579373993466271593"));
+    }
+
+    #[test]
+    fn subtration_6() {
+        let x = BigNum::from_dec_str("23154213980470912384723014872301984732901847329014782309184732190487321098473219084703912847390218479301247891203857910246589127643091284730918472319084720470956812095");
+        let y = BigNum::from_dec_str("4250102498509328140392147889321743982164125943275987342598723194873219847329847938214739218472138965382176423879648329746983217469382174683217946392817461987346193827");
+
+        let result = x - y;
+
+        assert_eq!(result, BigNum::from_dec_str("18904111481961584244330866982980240750737721385738794966586008995614101251143371146489173628918079513919071467324209580499605910173709110047700525926267258483610618268"));
     }
 }
 
