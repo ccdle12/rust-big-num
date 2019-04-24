@@ -128,28 +128,15 @@ impl Sub for BigNum {
         let small = cmp::min(&self, &other);
 
         for i in 0..small.num.len() {
-            // Assign each number as minuend (m) and added (a) == m - a = r.
+            // Assign each number as minuend (m) and added (a).
+            // m - a = r.
             let mut minuend = self.num[i as usize];
             let addend = other.num[i as usize];
 
-            println!("minuend - addend: {} - {}", minuend, addend);
             // The result at each column of subtraction.
-            // E.g. 150 - 33:
-            //  150
-            // - 33
-            // ----
-            //  127
             let mut column_result = 0;
 
-            // If minued is less than addend with no existing carry.
-            if minuend < addend && carry > 0 {
-                minuend += 10;
-                result.push((minuend - addend) - carry);
-                continue;
-            }
-
-            // If minued and addend are the same with an existing carry.
-            if minuend == addend && carry > 0 {
+            if minuend == addend && carry > 0 || minuend < addend && carry > 0 {
                 minuend += 10;
                 result.push((minuend - addend) - carry);
                 continue;
