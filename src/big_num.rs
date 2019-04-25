@@ -345,9 +345,31 @@ mod subtraction_tests {
 
         let result = x - y;
 
+        // TODO: After updating initialising a negative num, update this test.
         assert_eq!(result.to_string(), "-2");
     }
 
+    #[test]
+    fn subtraction_negative_2() {
+        let x = BigNum::from_dec_str("1");
+        let y = BigNum::from_dec_str("10");
+
+        let result = x - y;
+
+        assert_eq!(result.to_string(), "-9");
+    }
+
+    #[test]
+    fn subtraction_negative_3() {
+        let x = BigNum::from_dec_str(
+            "11092582130948132095819287519023847329184739281472309847321522222222",
+        );
+        let y = BigNum::from_dec_str("481902347912387592138041235712098473291847398217439287409321847918275129835723190847312894071234");
+
+        let result = x - y;
+
+        assert_eq!(result.to_string(), "-481902347912387592138041235701005891160899266121619999890298000589090390554250880999991371849012");
+    }
 }
 
 #[cfg(test)]
