@@ -1,4 +1,4 @@
-use crate::helper::{compare_num, remove_leading_zeroes, BigDigit, RADIX};
+use crate::helper::{compare_num, remove_leading_zeroes, BigDigit, DigitPrimitive, RADIX};
 use rand::Rng;
 use std::cmp;
 use std::cmp::Ordering::{self, Equal};
@@ -39,7 +39,7 @@ impl BigNum {
     pub fn from_dec_str(input: &str) -> BigNum {
         let mut num: BigDigit = input
             .chars()
-            .map(|x| x.to_digit(RADIX).unwrap() as u8)
+            .map(|x| x.to_digit(RADIX).unwrap() as DigitPrimitive)
             .collect();
 
         // Num is stored in reverse order *little endian*, easier for arithmetic.
