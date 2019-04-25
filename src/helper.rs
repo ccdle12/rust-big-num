@@ -1,8 +1,11 @@
 use std::cmp::Ordering::{self, Equal, Greater, Less};
 
+/// TEMP! Experimenting with using a DigitPrimitive type.
+pub type DigitPrimitive = u8;
+
 /// BigDigit is the type used in the BigNum field num, essentially just a vec of
 /// bytes.
-pub type BigDigit = Vec<u8>;
+pub type BigDigit = Vec<DigitPrimitive>;
 
 /// Radix is a constant used as the base for string number conversion.
 pub const RADIX: u32 = 10;
