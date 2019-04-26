@@ -9,13 +9,21 @@ use std::ops::{Add, Sub};
 #[derive(Eq, Debug)]
 pub struct BigNum {
     num: BigDigit,
-    sign: bool,
+    sign: Sign,
+}
+
+/// Sign is an enum to be used identifying whether a number is positive or
+/// negative.
+#[derive(PartialEq, Eq, Debug)]
+pub enum Sign {
+    Positive,
+    Negative,
 }
 
 // Implement Ordering for comparisons of BigNum.
 impl Ord for BigNum {
     fn cmp(&self, other: &BigNum) -> Ordering {
-        compare_num((&self.num, self.sign), (&other.num, other.sign))
+        compare_num((&self.num, &self.sign), (&other.num, &other.sign))
     }
 }
 
@@ -38,11 +46,11 @@ impl BigNum {
     /// Takes a decimal string representation, parses and returns as a BigNum.
     pub fn from_dec_str(input: &str) -> BigNum {
         let mut num: BigDigit;
-        let mut sign: bool = false;
+        let mut sign = Sign::Positive;
 
         // TODO: can this be made without duplication?
         if input.starts_with('-') {
-            sign = true;
+            sign = Sign::Negative;
             num = input
                 .chars()
                 .skip(1)
@@ -71,7 +79,10 @@ impl BigNum {
                 num[i] = rand::thread_rng().gen_range(0, 10);
             }
 
-            let mut below_num = BigNum { num, sign: false };
+            let mut below_num = BigNum {
+                num,
+                sign: Sign::Positive,
+            };
 
             remove_leading_zeroes(&mut below_num.num);
 
@@ -88,7 +99,7 @@ impl fmt::Display for BigNum {
         let mut num_str: String = self.num.iter().map(|x| x.to_string()).rev().collect();
 
         // Check if the number is negative.
-        if self.sign {
+        if self.sign == Sign::Negative {
             num_str.insert(0, '-');
         }
 
@@ -102,6 +113,7 @@ impl Add for BigNum {
     fn add(self, other: BigNum) -> BigNum {
         // TODO: rename using correct arithmetic terms.
         // TODO: refactor operands to big single characters.
+        // TODO: need to do adding from negative num.
         let mut result: BigDigit = vec![];
 
         let big = cmp::max(&self, &other);
@@ -137,7 +149,7 @@ impl Add for BigNum {
 
         BigNum {
             num: result,
-            sign: false,
+            sign: Sign::Positive,
         }
     }
 }
@@ -146,8 +158,7 @@ impl Sub for BigNum {
     type Output = BigNum;
 
     fn sub(self, other: BigNum) -> BigNum {
-        // Used to flag if the result will be negative.
-        let mut sign: bool = false;
+        let mut sign = Sign::Positive;
 
         // Operands for the subtraction.
         let minuend: BigDigit;
@@ -159,7 +170,7 @@ impl Sub for BigNum {
         // Assigning minuend and addend, helpful when flagging for negative
         // number.
         if self < other {
-            sign = true;
+            sign = Sign::Negative;
             minuend = other.num;
             addend = self.num;
         } else {
@@ -190,7 +201,7 @@ impl Sub for BigNum {
                 continue;
             }
 
-            // Result at column.
+            // Calculate result at column.
             if carry > 0 {
                 column_result = (m - a) - carry;
             } else {
@@ -370,8 +381,7 @@ mod subtraction_tests {
 
         let result = x - y;
 
-        // TODO: After updating initialising a negative num, update this test.
-        assert_eq!(result.to_string(), "-2");
+        assert_eq!(result, BigNum::from_dec_str("-2"));
     }
 
     #[test]
@@ -496,9 +506,6 @@ mod random_number_tests {
     fn generate_random_number_1() {
         let x = BigNum::from_dec_str("42");
         let y = BigNum::gen_rand_num_below(&x);
-
-        println!("x: {}", x);
-        println!("y: {}", y);
 
         assert!(y < x);
     }
