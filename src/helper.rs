@@ -12,8 +12,13 @@ pub const RADIX: u32 = 10;
 
 /// compare_num is used to compare the BigDigit of each BigNum and return an
 /// enum of Ordering. This is primarily used in the Ord trait implementation.
-pub fn compare_num(x: &BigDigit, y: &BigDigit) -> Ordering {
-    let (x_len, y_len) = (x.len(), y.len());
+pub fn compare_num(x: (&BigDigit, bool), y: (&BigDigit, bool)) -> Ordering {
+    // Check and compare the sign first.
+    if x.1 && !y.1 {
+        return Less;
+    }
+
+    let (x_len, y_len) = (x.0.len(), y.0.len());
 
     if x_len < y_len {
         return Less;
@@ -23,7 +28,7 @@ pub fn compare_num(x: &BigDigit, y: &BigDigit) -> Ordering {
         return Greater;
     }
 
-    for (&xi, &yi) in x.iter().rev().zip(y.iter().rev()) {
+    for (&xi, &yi) in x.0.iter().rev().zip(y.0.iter().rev()) {
         if xi < yi {
             return Less;
         }
