@@ -8,8 +8,9 @@ use std::ops::{Add, Sub};
 /// BigNum holds a BigDigit (Vec) of bytes that represent a big number.
 #[derive(Eq, Debug)]
 pub struct BigNum {
-    num: BigDigit,
-    sign: Sign,
+    // The following fields should only be public within the crate.
+    pub(crate) num: BigDigit,
+    pub(crate) sign: Sign,
 }
 
 /// Sign is an enum to be used identifying whether a number is positive or
@@ -23,7 +24,7 @@ pub enum Sign {
 // Implement Ordering for comparisons of BigNum.
 impl Ord for BigNum {
     fn cmp(&self, other: &BigNum) -> Ordering {
-        compare_num((&self.num, &self.sign), (&other.num, &other.sign))
+        compare_num(self, other)
     }
 }
 
