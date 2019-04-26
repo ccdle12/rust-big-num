@@ -54,12 +54,12 @@ impl BigNum {
             num = input
                 .chars()
                 .skip(1)
-                .map(|x| x.to_digit(RADIX).unwrap() as DigitPrimitive)
+                .map(|x| x.to_digit(RADIX).expect("cannot pass non digits") as DigitPrimitive)
                 .collect();
         } else {
             num = input
                 .chars()
-                .map(|x| x.to_digit(RADIX).unwrap() as DigitPrimitive)
+                .map(|x| x.to_digit(RADIX).expect("cannot pass non digits") as DigitPrimitive)
                 .collect();
         }
 
@@ -224,17 +224,22 @@ impl Sub for BigNum {
     }
 }
 
-// TODO: LOOK UP how to test for errors.
-// #[cfg(test)]
-// mod init_tests {
-//     use super::*;
-//
-//     #[test]
-//     fn dec_str_1() {
-//         let x = BigNum::from_dec_str("sfdafs");
-//     }
-//
-// }
+#[cfg(test)]
+mod init_tests {
+    use super::*;
+
+    #[test]
+    #[should_panic]
+    fn dec_str_1() {
+        let x = BigNum::from_dec_str("sfdafs");
+    }
+
+    #[test]
+    #[should_panic]
+    fn dec_str_2() {
+        let x = BigNum::from_dec_str("-123asdz!$");
+    }
+}
 
 #[cfg(test)]
 mod addition_tests {
