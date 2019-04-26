@@ -1,6 +1,7 @@
+use crate::big_num::Sign;
 use std::cmp::Ordering::{self, Equal, Greater, Less};
 
-/// TEMP! Experimenting with using a DigitPrimitive type.
+/// DigitPrimitive type used in the BigDigit type.
 pub type DigitPrimitive = u8;
 
 /// BigDigit is the type used in the BigNum field num, essentially just a vec of
@@ -12,20 +13,18 @@ pub const RADIX: u32 = 10;
 
 /// compare_num is used to compare the BigDigit of each BigNum and return an
 /// enum of Ordering. This is primarily used in the Ord trait implementation.
-pub fn compare_num(x: (&BigDigit, bool), y: (&BigDigit, bool)) -> Ordering {
+pub fn compare_num(x: (&BigDigit, &Sign), y: (&BigDigit, &Sign)) -> Ordering {
     // Check and compare the sign first.
-    // x is negative and why is positive.
-    if x.1 && !y.1 {
+    if *x.1 == Sign::Negative && *y.1 == Sign::Positive {
         return Less;
     }
 
-    // x is positive and y is negative.
-    if !x.1 && y.1 {
+    if *x.1 == Sign::Positive && *y.1 == Sign::Negative {
         return Greater;
     }
 
     // Switch on the Ordering according to the sign.
-    let switch: bool = x.1 && y.1;
+    let switch: bool = *x.1 == Sign::Negative && *y.1 == Sign::Negative;
 
     // Compare the lengths.
     let (x_len, y_len) = (x.0.len(), y.0.len());
