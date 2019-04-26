@@ -454,6 +454,38 @@ mod comparison_tests {
 
         assert!(x < y);
     }
+
+    #[test]
+    fn compare_negative_num_2() {
+        let x = BigNum::from_dec_str("1");
+        let y = BigNum::from_dec_str("-1");
+
+        assert!(x > y);
+    }
+
+    #[test]
+    fn compare_negative_num_3() {
+        let x = BigNum::from_dec_str("-9");
+        let y = BigNum::from_dec_str("-1");
+
+        assert!(x < y);
+    }
+
+    #[test]
+    fn compare_negative_num_4() {
+        let x = BigNum::from_dec_str("-1204124124");
+        let y = BigNum::from_dec_str("-1");
+
+        assert!(x < y);
+    }
+
+    #[test]
+    fn compare_negative_num_5() {
+        let x = BigNum::from_dec_str("-1204124124");
+        let y = BigNum::from_dec_str("-1204124124");
+
+        assert!(x == y);
+    }
 }
 
 #[cfg(test)]
