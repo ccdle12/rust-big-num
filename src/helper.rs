@@ -1,4 +1,4 @@
-use crate::big_num::Sign;
+use crate::big_num::{BigNum, Sign};
 use std::cmp::Ordering::{self, Equal, Greater, Less};
 
 /// DigitPrimitive type used in the BigDigit type.
@@ -13,21 +13,21 @@ pub const RADIX: u32 = 10;
 
 /// compare_num is used to compare the BigDigit of each BigNum and return an
 /// enum of Ordering. This is primarily used in the Ord trait implementation.
-pub fn compare_num(x: (&BigDigit, &Sign), y: (&BigDigit, &Sign)) -> Ordering {
+pub fn compare_num(x: &BigNum, y: &BigNum) -> Ordering {
     // Check and compare the sign first.
-    if *x.1 == Sign::Negative && *y.1 == Sign::Positive {
+    if x.sign == Sign::Negative && y.sign == Sign::Positive {
         return Less;
     }
 
-    if *x.1 == Sign::Positive && *y.1 == Sign::Negative {
+    if x.sign == Sign::Positive && y.sign == Sign::Negative {
         return Greater;
     }
 
     // Switch on the Ordering according to the sign.
-    let switch: bool = *x.1 == Sign::Negative && *y.1 == Sign::Negative;
+    let switch: bool = x.sign == Sign::Negative && y.sign == Sign::Negative;
 
     // Compare the lengths.
-    let (x_len, y_len) = (x.0.len(), y.0.len());
+    let (x_len, y_len) = (x.num.len(), y.num.len());
 
     if x_len < y_len {
         return sign_switch(switch, Less);
@@ -38,7 +38,7 @@ pub fn compare_num(x: (&BigDigit, &Sign), y: (&BigDigit, &Sign)) -> Ordering {
     }
 
     // Compare each primitive digit.
-    for (&xi, &yi) in x.0.iter().rev().zip(y.0.iter().rev()) {
+    for (&xi, &yi) in x.num.iter().rev().zip(y.num.iter().rev()) {
         if xi < yi {
             return sign_switch(switch, Less);
         }
