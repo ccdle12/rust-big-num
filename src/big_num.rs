@@ -1,4 +1,4 @@
-use crate::helper::{compare_num, remove_leading_zeroes, BigDigit, RADIX};
+use crate::helper::{compare_num, remove_leading_zeroes, BigDigit, DigitPrimitive, RADIX};
 use rand::Rng;
 use std::cmp;
 use std::cmp::Ordering::{self, Equal};
@@ -9,12 +9,21 @@ use std::ops::{Add, Sub};
 #[derive(Eq, Debug)]
 pub struct BigNum {
     num: BigDigit,
+    sign: Sign,
+}
+
+/// Sign is an enum to be used identifying whether a number is positive or
+/// negative.
+#[derive(PartialEq, Eq, Debug)]
+pub enum Sign {
+    Positive,
+    Negative,
 }
 
 // Implement Ordering for comparisons of BigNum.
 impl Ord for BigNum {
     fn cmp(&self, other: &BigNum) -> Ordering {
-        compare_num(&self.num, &other.num)
+        compare_num((&self.num, &self.sign), (&other.num, &other.sign))
     }
 }
 
@@ -36,15 +45,28 @@ impl PartialEq for BigNum {
 impl BigNum {
     /// Takes a decimal string representation, parses and returns as a BigNum.
     pub fn from_dec_str(input: &str) -> BigNum {
-        let mut num: BigDigit = input
-            .chars()
-            .map(|x| x.to_digit(RADIX).unwrap() as u8)
-            .collect();
+        let mut num: BigDigit;
+        let mut sign = Sign::Positive;
+
+        // TODO: can this be made without duplication?
+        if input.starts_with('-') {
+            sign = Sign::Negative;
+            num = input
+                .chars()
+                .skip(1)
+                .map(|x| x.to_digit(RADIX).unwrap() as DigitPrimitive)
+                .collect();
+        } else {
+            num = input
+                .chars()
+                .map(|x| x.to_digit(RADIX).unwrap() as DigitPrimitive)
+                .collect();
+        }
 
         // Num is stored in reverse order *little endian*, easier for arithmetic.
         num.reverse();
 
-        BigNum { num }
+        BigNum { num, sign }
     }
 
     /// WARNING! Very basic naive random number generator below a given big
@@ -57,7 +79,10 @@ impl BigNum {
                 num[i] = rand::thread_rng().gen_range(0, 10);
             }
 
-            let mut below_num = BigNum { num };
+            let mut below_num = BigNum {
+                num,
+                sign: Sign::Positive,
+            };
 
             remove_leading_zeroes(&mut below_num.num);
 
@@ -71,7 +96,13 @@ impl BigNum {
 // fmt::Display implements to_string() for BigNum.
 impl fmt::Display for BigNum {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let num_str: String = self.num.iter().map(|x| x.to_string()).rev().collect();
+        let mut num_str: String = self.num.iter().map(|x| x.to_string()).rev().collect();
+
+        // Check if the number is negative.
+        if self.sign == Sign::Negative {
+            num_str.insert(0, '-');
+        }
+
         write!(f, "{}", num_str)
     }
 }
@@ -80,6 +111,9 @@ impl Add for BigNum {
     type Output = BigNum;
 
     fn add(self, other: BigNum) -> BigNum {
+        // TODO: rename using correct arithmetic terms.
+        // TODO: refactor operands to big single characters.
+        // TODO: need to do adding from negative num.
         let mut result: BigDigit = vec![];
 
         let big = cmp::max(&self, &other);
@@ -113,7 +147,10 @@ impl Add for BigNum {
         // Clear any leading zeroes.
         remove_leading_zeroes(&mut result);
 
-        BigNum { num: result }
+        BigNum {
+            num: result,
+            sign: Sign::Positive,
+        }
     }
 }
 
@@ -121,40 +158,54 @@ impl Sub for BigNum {
     type Output = BigNum;
 
     fn sub(self, other: BigNum) -> BigNum {
+        let mut sign = Sign::Positive;
+
+        // Operands for the subtraction.
+        let minuend: BigDigit;
+        let addend: BigDigit;
+
         let mut result: BigDigit = vec![];
         let mut carry = 0;
 
-        let big = cmp::max(&self, &other);
-        let small = cmp::min(&self, &other);
+        // Assigning minuend and addend, helpful when flagging for negative
+        // number.
+        if self < other {
+            sign = Sign::Negative;
+            minuend = other.num;
+            addend = self.num;
+        } else {
+            minuend = self.num;
+            addend = other.num;
+        }
 
-        for i in 0..small.num.len() {
+        for i in 0..addend.len() {
             // Assign each number as minuend (m) and added (a).
             // m - a = r.
-            let mut minuend = self.num[i as usize];
-            let addend = other.num[i as usize];
+            let mut m = minuend[i as usize];
+            let a = addend[i as usize];
 
             // The result at each column of subtraction.
             let mut column_result = 0;
 
-            if minuend == addend && carry > 0 || minuend < addend && carry > 0 {
-                minuend += 10;
-                result.push((minuend - addend) - carry);
+            if m == a && carry > 0 || m < a && carry > 0 {
+                m += 10;
+                result.push((m - a) - carry);
                 continue;
             }
 
             // Add 10 to enable subtraction of a lower value.
-            if minuend < addend {
-                minuend += 10;
-                result.push(minuend - addend);
+            if m < a {
+                m += 10;
+                result.push(m - a);
                 carry = 1;
                 continue;
             }
 
-            // Result at column.
+            // Calculate result at column.
             if carry > 0 {
-                column_result = (minuend - addend) - carry;
+                column_result = (m - a) - carry;
             } else {
-                column_result = minuend - addend;
+                column_result = m - a;
             }
 
             result.push(column_result);
@@ -162,16 +213,28 @@ impl Sub for BigNum {
         }
 
         // Sub the rest if there is a difference between small and big.
-        for i in small.num.len()..big.num.len() {
-            result.push(big.num[i] - carry);
+        for i in addend.len()..minuend.len() {
+            result.push(minuend[i] - carry);
             carry = 0;
         }
 
         remove_leading_zeroes(&mut result);
 
-        BigNum { num: result }
+        BigNum { num: result, sign }
     }
 }
+
+// TODO: LOOK UP how to test for errors.
+// #[cfg(test)]
+// mod init_tests {
+//     use super::*;
+//
+//     #[test]
+//     fn dec_str_1() {
+//         let x = BigNum::from_dec_str("sfdafs");
+//     }
+//
+// }
 
 #[cfg(test)]
 mod addition_tests {
@@ -310,6 +373,38 @@ mod subtraction_tests {
 
         assert_eq!(result, BigNum::from_dec_str("18904111481961584244330866982980240750737721385738794966586008995614101251143371146489173628918079513919071467324209580499605910173709110047700525926267258483610618268"));
     }
+
+    #[test]
+    fn subtraction_negative_1() {
+        let x = BigNum::from_dec_str("100");
+        let y = BigNum::from_dec_str("102");
+
+        let result = x - y;
+
+        assert_eq!(result, BigNum::from_dec_str("-2"));
+    }
+
+    #[test]
+    fn subtraction_negative_2() {
+        let x = BigNum::from_dec_str("1");
+        let y = BigNum::from_dec_str("10");
+
+        let result = x - y;
+
+        assert_eq!(result, BigNum::from_dec_str("-9"));
+    }
+
+    #[test]
+    fn subtraction_negative_3() {
+        let x = BigNum::from_dec_str(
+            "11092582130948132095819287519023847329184739281472309847321522222222",
+        );
+        let y = BigNum::from_dec_str("481902347912387592138041235712098473291847398217439287409321847918275129835723190847312894071234");
+
+        let result = x - y;
+
+        assert_eq!(result, BigNum::from_dec_str("-481902347912387592138041235701005891160899266121619999890298000589090390554250880999991371849012"));
+    }
 }
 
 #[cfg(test)]
@@ -361,6 +456,46 @@ mod comparison_tests {
 
         assert!(x < y);
     }
+
+    #[test]
+    fn compare_negative_num_1() {
+        let x = BigNum::from_dec_str("-1");
+        let y = BigNum::from_dec_str("1");
+
+        assert!(x < y);
+    }
+
+    #[test]
+    fn compare_negative_num_2() {
+        let x = BigNum::from_dec_str("1");
+        let y = BigNum::from_dec_str("-1");
+
+        assert!(x > y);
+    }
+
+    #[test]
+    fn compare_negative_num_3() {
+        let x = BigNum::from_dec_str("-9");
+        let y = BigNum::from_dec_str("-1");
+
+        assert!(x < y);
+    }
+
+    #[test]
+    fn compare_negative_num_4() {
+        let x = BigNum::from_dec_str("-1204124124");
+        let y = BigNum::from_dec_str("-1");
+
+        assert!(x < y);
+    }
+
+    #[test]
+    fn compare_negative_num_5() {
+        let x = BigNum::from_dec_str("-1204124124");
+        let y = BigNum::from_dec_str("-1204124124");
+
+        assert!(x == y);
+    }
 }
 
 #[cfg(test)]
@@ -371,9 +506,6 @@ mod random_number_tests {
     fn generate_random_number_1() {
         let x = BigNum::from_dec_str("42");
         let y = BigNum::gen_rand_num_below(&x);
-
-        println!("x: {}", x);
-        println!("y: {}", y);
 
         assert!(y < x);
     }
