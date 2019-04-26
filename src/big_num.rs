@@ -15,7 +15,7 @@ pub struct BigNum {
 // Implement Ordering for comparisons of BigNum.
 impl Ord for BigNum {
     fn cmp(&self, other: &BigNum) -> Ordering {
-        compare_num(&self.num, &other.num)
+        compare_num((&self.num, self.sign), (&other.num, other.sign))
     }
 }
 
@@ -447,13 +447,13 @@ mod comparison_tests {
         assert!(x < y);
     }
 
-    // #[test]
-    // fn compare_negative_num_1() {
-    //     let x = BigNum::from_dec_str("-1");
-    //     let y = BigNum::from_dec_str("1");
-    //
-    //     assert!(x < y);
-    // }
+    #[test]
+    fn compare_negative_num_1() {
+        let x = BigNum::from_dec_str("-1");
+        let y = BigNum::from_dec_str("1");
+
+        assert!(x < y);
+    }
 }
 
 #[cfg(test)]
