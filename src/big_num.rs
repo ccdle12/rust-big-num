@@ -37,15 +37,28 @@ impl PartialEq for BigNum {
 impl BigNum {
     /// Takes a decimal string representation, parses and returns as a BigNum.
     pub fn from_dec_str(input: &str) -> BigNum {
-        let mut num: BigDigit = input
-            .chars()
-            .map(|x| x.to_digit(RADIX).unwrap() as DigitPrimitive)
-            .collect();
+        let mut num: BigDigit;
+        let mut sign: bool = false;
+
+        // TODO: can this be made without duplication?
+        if input.starts_with('-') {
+            sign = true;
+            num = input
+                .chars()
+                .skip(1)
+                .map(|x| x.to_digit(RADIX).unwrap() as DigitPrimitive)
+                .collect();
+        } else {
+            num = input
+                .chars()
+                .map(|x| x.to_digit(RADIX).unwrap() as DigitPrimitive)
+                .collect();
+        }
 
         // Num is stored in reverse order *little endian*, easier for arithmetic.
         num.reverse();
 
-        BigNum { num, sign: false }
+        BigNum { num, sign }
     }
 
     /// WARNING! Very basic naive random number generator below a given big
@@ -199,6 +212,18 @@ impl Sub for BigNum {
         BigNum { num: result, sign }
     }
 }
+
+// TODO: LOOK UP how to test for errors.
+// #[cfg(test)]
+// mod init_tests {
+//     use super::*;
+//
+//     #[test]
+//     fn dec_str_1() {
+//         let x = BigNum::from_dec_str("sfdafs");
+//     }
+//
+// }
 
 #[cfg(test)]
 mod addition_tests {
@@ -356,7 +381,7 @@ mod subtraction_tests {
 
         let result = x - y;
 
-        assert_eq!(result.to_string(), "-9");
+        assert_eq!(result, BigNum::from_dec_str("-9"));
     }
 
     #[test]
@@ -368,7 +393,7 @@ mod subtraction_tests {
 
         let result = x - y;
 
-        assert_eq!(result.to_string(), "-481902347912387592138041235701005891160899266121619999890298000589090390554250880999991371849012");
+        assert_eq!(result, BigNum::from_dec_str("-481902347912387592138041235701005891160899266121619999890298000589090390554250880999991371849012"));
     }
 }
 
@@ -421,6 +446,14 @@ mod comparison_tests {
 
         assert!(x < y);
     }
+
+    // #[test]
+    // fn compare_negative_num_1() {
+    //     let x = BigNum::from_dec_str("-1");
+    //     let y = BigNum::from_dec_str("1");
+    //
+    //     assert!(x < y);
+    // }
 }
 
 #[cfg(test)]
