@@ -53,8 +53,8 @@ pub fn compare_num(x: (&BigDigit, bool), y: (&BigDigit, bool)) -> Ordering {
 }
 
 // internal helper function, given the sign and the positive expected Ordering,
-// the function will switch return the positive expected Ordering if b is true,
-// and return the switch (opposite) Ordering if b is false.
+// the function will switch and return the positive expected Ordering if b is
+// true and return the opposite Ordering if b is false.
 fn sign_switch(b: bool, positive_ord: Ordering) -> Ordering {
     match b {
         true => {
