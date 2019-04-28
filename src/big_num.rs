@@ -120,6 +120,16 @@ impl Add for BigNum {
         let big = cmp::max(&self, &other);
         let small = cmp::min(&self, &other);
 
+        // TEMP:
+        let mut sign = Sign::Positive;
+        if self.sign == Sign::Negative && other.sign == Sign::Negative {
+            sign = Sign::Negative;
+        }
+
+        // if self.sign == Sign::Negative && other.sign == Sign::Positive {
+        // A minus implementation.
+        // }
+
         // Iterate and calculate addition for all of i8s in small.
         let mut carry = 0;
         for i in 0..small.num.len() {
@@ -148,10 +158,7 @@ impl Add for BigNum {
         // Clear any leading zeroes.
         remove_leading_zeroes(&mut result);
 
-        BigNum {
-            num: result,
-            sign: Sign::Positive,
-        }
+        BigNum { num: result, sign }
     }
 }
 
@@ -239,6 +246,29 @@ mod init_tests {
     #[should_panic]
     fn dec_str_2() {
         let x = BigNum::from_dec_str("-123asdz!$");
+    }
+}
+
+#[cfg(test)]
+mod negative_addition_tests {
+    use super::*;
+
+    #[test]
+    fn negative_add_1() {
+        let x = BigNum::from_dec_str("-2");
+        let y = BigNum::from_dec_str("-1");
+
+        let result = x + y;
+        assert_eq!(result, BigNum::from_dec_str("-3"));
+    }
+
+    #[test]
+    fn negative_add_2() {
+        let x = BigNum::from_dec_str("-2");
+        let y = BigNum::from_dec_str("1");
+
+        let result = x + y;
+        assert_eq!(result, BigNum::from_dec_str("-1"));
     }
 }
 
