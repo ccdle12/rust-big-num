@@ -112,37 +112,45 @@ impl Add for BigNum {
     type Output = BigNum;
 
     fn add(self, other: BigNum) -> BigNum {
-        // TODO: rename using correct arithmetic terms.
-        // TODO: refactor operands to big single characters.
         // TODO: need to do adding from negative num.
-        let mut result: BigDigit = vec![];
 
-        let big = cmp::max(&self, &other);
-        let small = cmp::min(&self, &other);
+        // Initialise the result vec and carry.
+        let (mut result, mut carry) = (vec![], 0);
 
-        // Iterate and calculate addition for all of i8s in small.
-        let mut carry = 0;
-        for i in 0..small.num.len() {
-            let mut r = (big.num[i] + small.num[i]) + carry;
-            carry = 0;
+        // Retrieve the iterators for each BigDigit.
+        let mut iter_1 = self.num.iter();
+        let mut iter_2 = other.num.iter();
 
-            if r >= 10 {
-                carry = 1;
-                r = r - 10;
+        // Add both numbers at each column, this is achieved by iterating over
+        // different sized BigDigits by calling `next()` on each iterator and
+        // checking the Option<> Enum value for Some or None. We can continue
+        // iterating over one list when the other is exhausted. We also add
+        // and update carry, we can mod the result by 10 to give us the
+        // remainder if the total is above 10 and we can reset the carry by
+        // dividing by 10. Since Rust will floor the division, if there is a
+        // carry it will always be 1 and if its below 10 carry will always be 0.
+        loop {
+            match (iter_1.next(), iter_2.next()) {
+                (None, None) => break,
+                (Some(x), Some(y)) => {
+                    carry += x;
+                    carry += y;
+                }
+                (Some(x), None) => {
+                    carry += x;
+                }
+                (None, Some(y)) => {
+                    carry += y;
+                }
             }
 
-            result.push(r);
+            result.push(carry % 10);
+            carry = carry / 10;
         }
 
-        // Add the rest if there is a difference between small and big.
-        for i in small.num.len()..big.num.len() {
-            result.push(big.num[i] + carry);
-            carry = 0;
-        }
-
-        // Catch any left over carry.
-        if carry > 0 {
-            result.push(carry)
+        // Catch any lingering carry.
+        if carry == 1 {
+            result.push(1);
         }
 
         // Clear any leading zeroes.
