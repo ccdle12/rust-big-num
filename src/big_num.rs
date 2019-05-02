@@ -1,5 +1,6 @@
 use crate::helper::{
-    add_big_digits, compare_num, remove_leading_zeroes, BigDigit, DigitPrimitive, RADIX,
+    add_big_digits, compare_num, remove_leading_zeroes, sub_big_digits, BigDigit, DigitPrimitive,
+    RADIX,
 };
 use rand::Rng;
 use std::cmp;
@@ -144,9 +145,6 @@ impl Sub for BigNum {
         let minuend: BigDigit;
         let addend: BigDigit;
 
-        let mut result: BigDigit = vec![];
-        let mut carry = 0;
-
         // Assigning minuend and addend, helpful when flagging for negative
         // number.
         if self < other {
@@ -158,49 +156,9 @@ impl Sub for BigNum {
             addend = other.num;
         }
 
-        for i in 0..addend.len() {
-            // Assign each number as minuend (m) and added (a).
-            // m - a = r.
-            let mut m = minuend[i as usize];
-            let a = addend[i as usize];
+        let num = sub_big_digits(&minuend, &addend);
 
-            // The result at each column of subtraction.
-            let mut column_result = 0;
-
-            if m == a && carry > 0 || m < a && carry > 0 {
-                m += 10;
-                result.push((m - a) - carry);
-                continue;
-            }
-
-            // Add 10 to enable subtraction of a lower value.
-            if m < a {
-                m += 10;
-                result.push(m - a);
-                carry = 1;
-                continue;
-            }
-
-            // Calculate result at column.
-            if carry > 0 {
-                column_result = (m - a) - carry;
-            } else {
-                column_result = m - a;
-            }
-
-            result.push(column_result);
-            carry = 0;
-        }
-
-        // Sub the rest if there is a difference between small and big.
-        for i in addend.len()..minuend.len() {
-            result.push(minuend[i] - carry);
-            carry = 0;
-        }
-
-        remove_leading_zeroes(&mut result);
-
-        BigNum { num: result, sign }
+        BigNum { num, sign }
     }
 }
 
