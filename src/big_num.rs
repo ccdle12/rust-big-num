@@ -86,12 +86,12 @@ impl BigNum {
                 num[i] = rand::thread_rng().gen_range(0, 10);
             }
 
-            let mut below_num = BigNum {
+            num = remove_leading_zeroes(num);
+
+            let below_num = BigNum {
                 num,
                 sign: Sign::Positive,
             };
-
-            remove_leading_zeroes(&mut below_num.num);
 
             if below_num < *target {
                 return below_num;
@@ -125,6 +125,10 @@ impl Add for BigNum {
         match (self.sign, other.sign) {
             (Sign::Negative, Sign::Negative) => {
                 sign = Sign::Negative;
+            }
+            (Sign::Negative, Sign::Positive) => {
+                let num = sub_big_digits(&self.num, &other.num);
+                return BigNum { num, sign };
             }
             _ => {}
         }
@@ -260,14 +264,14 @@ mod addition_tests {
         assert_eq!(result, BigNum::from_dec_str("-20"));
     }
 
-    // #[test]
-    // fn add_negative_numbers_2() {
-    //     let x = BigNum::from_dec_str("-10");
-    //     let y = BigNum::from_dec_str("10");
-    //     let result = x + y;
-    //
-    //     assert_eq!(result, BigNum::from_dec_str("0"));
-    // }
+    #[test]
+    fn add_negative_numbers_2() {
+        let x = BigNum::from_dec_str("-10");
+        let y = BigNum::from_dec_str("10");
+        let result = x + y;
+
+        assert_eq!(result, BigNum::from_dec_str("0"));
+    }
 }
 
 #[cfg(test)]
