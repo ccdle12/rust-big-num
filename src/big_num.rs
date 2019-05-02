@@ -1,6 +1,6 @@
 use crate::helper::{
-    add_big_digits, compare_num, remove_leading_zeroes, sub_big_digits, BigDigit, DigitPrimitive,
-    RADIX,
+    add_big_digits, compare_big_digit, compare_num, remove_leading_zeroes, sub_big_digits,
+    BigDigit, DigitPrimitive, RADIX,
 };
 use rand::Rng;
 use std::cmp::Ordering::{self, Equal};
@@ -110,20 +110,32 @@ impl Add for BigNum {
     type Output = BigNum;
 
     fn add(self, other: BigNum) -> BigNum {
-        // Update the sign of the result on the state of self and others sign.
+        // Checks each combination of adding positive and negative numbers.
         let (num, sign): (BigDigit, Sign) = match (self.sign, other.sign) {
+            // Standard.
             (Sign::Positive, Sign::Positive) => {
                 let num = add_big_digits(&self.num, &other.num);
                 (num, Sign::Positive)
             }
+
+            // Negative number addition.
             (Sign::Negative, Sign::Negative) => {
                 let num = add_big_digits(&self.num, &other.num);
                 (num, Sign::Negative)
             }
+
+            // Negative plus Positive.
             (Sign::Negative, Sign::Positive) => {
-                let num = sub_big_digits(&self.num, &other.num);
-                (num, Sign::Positive)
+                let (num, sign): (BigDigit, Sign) = match compare_big_digit(&self.num, &other.num) {
+                    Ordering::Less => (sub_big_digits(&other.num, &self.num), Sign::Positive),
+                    Ordering::Equal => (sub_big_digits(&self.num, &other.num), Sign::Positive),
+                    Ordering::Greater => (sub_big_digits(&self.num, &other.num), Sign::Negative),
+                };
+
+                (num, sign)
             }
+
+            // Positive plus Negative.
             (Sign::Positive, Sign::Negative) => {
                 let num = sub_big_digits(&self.num, &other.num);
                 (num, Sign::Positive)
@@ -144,7 +156,9 @@ impl Sub for BigNum {
         let num: BigDigit;
 
         // Assigning minuend and addend, helpful when flagging for negative
-        // number. FYI: sub_big_digits(minuend, addend).
+        // number.
+        //
+        // FYI: sub_big_digits(minuend, addend).
         match self < other {
             true => {
                 sign = Sign::Negative;
@@ -272,6 +286,15 @@ mod addition_tests {
     fn add_negative_numbers_3() {
         let x = BigNum::from_dec_str("10");
         let y = BigNum::from_dec_str("-5");
+        let result = x + y;
+
+        assert_eq!(result, BigNum::from_dec_str("5"));
+    }
+
+    #[test]
+    fn add_negative_numbers_4() {
+        let x = BigNum::from_dec_str("-5");
+        let y = BigNum::from_dec_str("10");
         let result = x + y;
 
         assert_eq!(result, BigNum::from_dec_str("5"));
