@@ -64,53 +64,95 @@ pub(crate) fn add_big_digits(x: &BigDigit, y: &BigDigit) -> BigDigit {
 
 // TODO: (ccdle12) Separate Big Digit and its functions to own file.
 pub(crate) fn sub_big_digits(minuend: &BigDigit, addend: &BigDigit) -> BigDigit {
-    let mut result: BigDigit = vec![];
-    let mut carry = 0;
+    let (mut result, mut carry) = (vec![], 0);
 
-    for i in 0..addend.len() {
-        // Assign each number as minuend (m) and added (a).
-        // m - a = r.
-        let mut m = minuend[i as usize];
-        let a = addend[i as usize];
+    // Retrieve the iterators for each BigDigit.
+    let mut iter_1 = minuend.iter();
+    let mut iter_2 = addend.iter();
 
-        // The result at each column of subtraction.
-        let mut column_result = 0;
+    loop {
+        match (iter_1.next(), iter_2.next()) {
+            (None, None) => break,
+            (Some(m), Some(a)) => {
+                if m == a && carry > 0 || m < a && carry > 0 {
+                    result.push(((*m + 10) - a) - carry);
+                    continue;
+                }
 
-        if m == a && carry > 0 || m < a && carry > 0 {
-            m += 10;
-            result.push((m - a) - carry);
-            continue;
+                // Add 10 to enable subtraction of a lower value.
+                if m < a {
+                    result.push((*m + 10) - a);
+                    carry = 1;
+                    continue;
+                }
+
+                // Calculate result at column.
+                if carry > 0 {
+                    result.push((*m - a) - carry);
+                } else {
+                    result.push(*m - a);
+                }
+
+                carry = 0;
+            }
+            (Some(m), None) => {
+                result.push(*m - carry);
+                carry = 0;
+            }
+            (None, Some(a)) => {
+                result.push(*a - carry);
+                carry = 0;
+            }
         }
-
-        // Add 10 to enable subtraction of a lower value.
-        if m < a {
-            m += 10;
-            result.push(m - a);
-            carry = 1;
-            continue;
-        }
-
-        // Calculate result at column.
-        if carry > 0 {
-            column_result = (m - a) - carry;
-        } else {
-            column_result = m - a;
-        }
-
-        result.push(column_result);
-        carry = 0;
     }
 
-    // Sub the rest if there is a difference between small and big.
-    for i in addend.len()..minuend.len() {
-        result.push(minuend[i] - carry);
-        carry = 0;
-    }
+    // TODO: (ccdle12) need this?
+    // if carry > 0 {
+    // result.push(1);
+    // }
 
-    result = remove_leading_zeroes(result);
-
-    result
+    remove_leading_zeroes(result)
 }
+// let mut result: BigDigit = vec![];
+// let mut carry = 0;
+//
+// for i in 0..addend.len() {
+//     // Assign each number as minuend (m) and added (a).
+//     // m - a = r.
+//     let mut m = minuend[i as usize];
+//     let a = addend[i as usize];
+//
+//     if m == a && carry > 0 || m < a && carry > 0 {
+//         m += 10;
+//         result.push((m - a) - carry);
+//         continue;
+//     }
+//
+//     // Add 10 to enable subtraction of a lower value.
+//     if m < a {
+//         m += 10;
+//         result.push(m - a);
+//         carry = 1;
+//         continue;
+//     }
+//
+//     // Calculate result at column.
+//     if carry > 0 {
+//         result.push((m - a) - carry);
+//     } else {
+//         result.push(m - a);
+//     }
+//
+//     carry = 0;
+// }
+//
+// // Sub the rest if there is a difference between small and big.
+// for i in addend.len()..minuend.len() {
+//     result.push(minuend[i] - carry);
+//     carry = 0;
+// }
+//
+// remove_leading_zeroes(result)
 
 /// compare_num is used to compare the BigDigit of each BigNum and return an
 /// enum of Ordering. This is primarily used in the Ord trait implementation.
@@ -172,6 +214,33 @@ fn sign_switch(b: bool, positive_ord: Ordering) -> Ordering {
             };
         }
     }
+}
+
+/// compare_big_digit is a function that purely comapres BigDigits.
+pub(crate) fn compare_big_digit(x: &BigDigit, y: &BigDigit) -> Ordering {
+    // Compare the lengths.
+    let (x_len, y_len) = (x.len(), y.len());
+
+    if x_len < y_len {
+        return Less;
+    }
+
+    if x_len > y_len {
+        return Greater;
+    }
+
+    // Compare each primitive digit.
+    for (&xi, &yi) in x.iter().rev().zip(y.iter().rev()) {
+        if xi < yi {
+            return Less;
+        }
+
+        if xi > yi {
+            return Greater;
+        }
+    }
+
+    Equal
 }
 
 /// A helper function to remove any leading zeroes from a BigDigit.
