@@ -267,6 +267,15 @@ mod addition_tests {
 
         assert_eq!(result, BigNum::from_dec_str("0"));
     }
+
+    #[test]
+    fn add_negative_numbers_3() {
+        let x = BigNum::from_dec_str("10");
+        let y = BigNum::from_dec_str("-5");
+        let result = x + y;
+
+        assert_eq!(result, BigNum::from_dec_str("5"));
+    }
 }
 
 #[cfg(test)]
