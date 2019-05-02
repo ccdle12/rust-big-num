@@ -1,5 +1,6 @@
 use crate::helper::{compare_num, remove_leading_zeroes, BigDigit, DigitPrimitive, RADIX};
 use rand::Rng;
+use std::cmp;
 use std::cmp::Ordering::{self, Equal};
 use std::fmt;
 use std::ops::{Add, Sub};
@@ -50,6 +51,8 @@ impl BigNum {
         let slice: &str;
         let mut sign = Sign::Positive;
 
+        // Match the first char to check if the decimal string is negative.
+        // Return a slice ignoring the minus symbol.
         match input.starts_with('-') {
             true => {
                 sign = Sign::Negative;
@@ -58,6 +61,7 @@ impl BigNum {
             _ => slice = &input,
         }
 
+        // Iterate and map each char to a DigitPrimitive, returns as a BigDigit.
         num = slice
             .chars()
             .map(|x| x.to_digit(RADIX).expect("cannot pass non digits") as DigitPrimitive)
