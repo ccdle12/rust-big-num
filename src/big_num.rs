@@ -141,22 +141,18 @@ impl Sub for BigNum {
     fn sub(self, other: BigNum) -> BigNum {
         let mut sign = Sign::Positive;
 
-        // Operands for the subtraction.
-        let minuend: BigDigit;
-        let addend: BigDigit;
+        // The returned result from call sub on big digits.
+        let num: BigDigit;
 
         // Assigning minuend and addend, helpful when flagging for negative
-        // number.
-        if self < other {
-            sign = Sign::Negative;
-            minuend = other.num;
-            addend = self.num;
-        } else {
-            minuend = self.num;
-            addend = other.num;
+        // number. FYI: sub_big_digits(minuend, addend).
+        match self < other {
+            true => {
+                sign = Sign::Negative;
+                num = sub_big_digits(&other.num, &self.num);
+            }
+            false => num = sub_big_digits(&self.num, &other.num),
         }
-
-        let num = sub_big_digits(&minuend, &addend);
 
         BigNum { num, sign }
     }
