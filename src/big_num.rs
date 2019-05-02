@@ -49,22 +49,15 @@ impl PartialEq for BigNum {
 impl BigNum {
     /// Takes a base 10 decimal string representation, parses and returns as a BigNum.
     pub fn from_dec_str(input: &str) -> BigNum {
-        let mut num: BigDigit;
-        let slice: &str;
-        let mut sign = Sign::Positive;
-
         // Match the first char to check if the decimal string is negative.
-        // Return a slice ignoring the minus symbol.
-        match input.starts_with('-') {
-            true => {
-                sign = Sign::Negative;
-                slice = &input[1..];
-            }
-            _ => slice = &input,
-        }
+        // Return a slice ignoring the minus symbol and the sign.
+        let (slice, sign): (&str, Sign) = match input.starts_with('-') {
+            true => (&input[1..], Sign::Negative),
+            _ => (&input, Sign::Positive),
+        };
 
         // Iterate and map each char to a DigitPrimitive, returns as a BigDigit.
-        num = slice
+        let mut num: BigDigit = slice
             .chars()
             .map(|x| x.to_digit(RADIX).expect("cannot pass non digits") as DigitPrimitive)
             .collect();
