@@ -1,4 +1,6 @@
-use crate::helper::{compare_num, remove_leading_zeroes, BigDigit, DigitPrimitive, RADIX};
+use crate::helper::{
+    add_big_digits, compare_num, remove_leading_zeroes, BigDigit, DigitPrimitive, RADIX,
+};
 use rand::Rng;
 use std::cmp;
 use std::cmp::Ordering::{self, Equal};
@@ -118,48 +120,6 @@ impl Add for BigNum {
         // TODO: need to do adding from negative num.
         let mut sign: Sign = Sign::Positive;
 
-        // Initialise the result vec and carry.
-        let (mut result, mut carry) = (vec![], 0);
-
-        // Retrieve the iterators for each BigDigit.
-        let mut iter_1 = self.num.iter();
-        let mut iter_2 = other.num.iter();
-
-        // Add both numbers at each column, this is achieved by iterating over
-        // different sized BigDigits by calling `next()` on each iterator and
-        // checking the Option<> Enum value for Some or None. We can continue
-        // iterating over one list when the other is exhausted. We also add
-        // and update carry, we can mod the result by 10 to give us the
-        // remainder if the total is above 10 and we can reset the carry by
-        // dividing by 10. Since Rust will floor the division, if there is a
-        // carry it will always be 1 and if its below 10 carry will always be 0.
-        loop {
-            match (iter_1.next(), iter_2.next()) {
-                (None, None) => break,
-                (Some(x), Some(y)) => {
-                    carry += x;
-                    carry += y;
-                }
-                (Some(x), None) => {
-                    carry += x;
-                }
-                (None, Some(y)) => {
-                    carry += y;
-                }
-            }
-
-            result.push(carry % 10);
-            carry = carry / 10;
-        }
-
-        // Catch any lingering carry.
-        if carry == 1 {
-            result.push(1);
-        }
-
-        // Clear any leading zeroes.
-        remove_leading_zeroes(&mut result);
-
         // Update the sign of the result on the state of self and others sign.
         match (self.sign, other.sign) {
             (Sign::Negative, Sign::Negative) => {
@@ -168,7 +128,9 @@ impl Add for BigNum {
             _ => {}
         }
 
-        BigNum { num: result, sign }
+        let num = add_big_digits(&self.num, &other.num);
+
+        BigNum { num, sign }
     }
 }
 
@@ -336,7 +298,7 @@ mod addition_tests {
     }
 
     #[test]
-    fn add_two_negative_numbers() {
+    fn add_negative_numbers_1() {
         let x = BigNum::from_dec_str("-10");
         let y = BigNum::from_dec_str("-10");
         let result = x + y;
@@ -344,6 +306,14 @@ mod addition_tests {
         assert_eq!(result, BigNum::from_dec_str("-20"));
     }
 
+    // #[test]
+    // fn add_negative_numbers_2() {
+    //     let x = BigNum::from_dec_str("-10");
+    //     let y = BigNum::from_dec_str("10");
+    //     let result = x + y;
+    //
+    //     assert_eq!(result, BigNum::from_dec_str("0"));
+    // }
 }
 
 #[cfg(test)]
