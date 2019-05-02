@@ -153,12 +153,9 @@ impl Sub for BigNum {
         // Assigning minuend and addend, helpful when flagging for negative
         // number.
         //
-        // FYI: sub_big_digits(minuend, addend).
+        // sub_big_digits(minuend, addend).
         let (num, sign): (BigDigit, Sign) = match self < other {
-            true => {
-                // sign = Sign::Negative;
-                (sub_big_digits(&other.num, &self.num), Sign::Negative)
-            }
+            true => (sub_big_digits(&other.num, &self.num), Sign::Negative),
             false => (sub_big_digits(&self.num, &other.num), Sign::Positive),
         };
 
