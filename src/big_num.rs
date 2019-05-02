@@ -110,22 +110,25 @@ impl Add for BigNum {
     type Output = BigNum;
 
     fn add(self, other: BigNum) -> BigNum {
-        // TODO: need to do adding from negative num.
-        let mut sign: Sign = Sign::Positive;
-
         // Update the sign of the result on the state of self and others sign.
-        match (self.sign, other.sign) {
+        let (num, sign): (BigDigit, Sign) = match (self.sign, other.sign) {
+            (Sign::Positive, Sign::Positive) => {
+                let num = add_big_digits(&self.num, &other.num);
+                (num, Sign::Positive)
+            }
             (Sign::Negative, Sign::Negative) => {
-                sign = Sign::Negative;
+                let num = add_big_digits(&self.num, &other.num);
+                (num, Sign::Negative)
             }
             (Sign::Negative, Sign::Positive) => {
                 let num = sub_big_digits(&self.num, &other.num);
-                return BigNum { num, sign };
+                (num, Sign::Positive)
             }
-            _ => {}
-        }
-
-        let num = add_big_digits(&self.num, &other.num);
+            (Sign::Positive, Sign::Negative) => {
+                let num = sub_big_digits(&self.num, &other.num);
+                (num, Sign::Positive)
+            }
+        };
 
         BigNum { num, sign }
     }
