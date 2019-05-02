@@ -106,53 +106,8 @@ pub(crate) fn sub_big_digits(minuend: &BigDigit, addend: &BigDigit) -> BigDigit 
         }
     }
 
-    // TODO: (ccdle12) need this?
-    // if carry > 0 {
-    // result.push(1);
-    // }
-
     remove_leading_zeroes(result)
 }
-// let mut result: BigDigit = vec![];
-// let mut carry = 0;
-//
-// for i in 0..addend.len() {
-//     // Assign each number as minuend (m) and added (a).
-//     // m - a = r.
-//     let mut m = minuend[i as usize];
-//     let a = addend[i as usize];
-//
-//     if m == a && carry > 0 || m < a && carry > 0 {
-//         m += 10;
-//         result.push((m - a) - carry);
-//         continue;
-//     }
-//
-//     // Add 10 to enable subtraction of a lower value.
-//     if m < a {
-//         m += 10;
-//         result.push(m - a);
-//         carry = 1;
-//         continue;
-//     }
-//
-//     // Calculate result at column.
-//     if carry > 0 {
-//         result.push((m - a) - carry);
-//     } else {
-//         result.push(m - a);
-//     }
-//
-//     carry = 0;
-// }
-//
-// // Sub the rest if there is a difference between small and big.
-// for i in addend.len()..minuend.len() {
-//     result.push(minuend[i] - carry);
-//     carry = 0;
-// }
-//
-// remove_leading_zeroes(result)
 
 /// compare_num is used to compare the BigDigit of each BigNum and return an
 /// enum of Ordering. This is primarily used in the Ord trait implementation.
