@@ -113,6 +113,7 @@ impl Add for BigNum {
 
     fn add(self, other: BigNum) -> BigNum {
         // TODO: need to do adding from negative num.
+        let mut sign: Sign = Sign::Positive;
 
         // Initialise the result vec and carry.
         let (mut result, mut carry) = (vec![], 0);
@@ -156,10 +157,15 @@ impl Add for BigNum {
         // Clear any leading zeroes.
         remove_leading_zeroes(&mut result);
 
-        BigNum {
-            num: result,
-            sign: Sign::Positive,
+        // Update the sign of the result on the state of self and others sign.
+        match (self.sign, other.sign) {
+            (Sign::Negative, Sign::Negative) => {
+                sign = Sign::Negative;
+            }
+            _ => {}
         }
+
+        BigNum { num: result, sign }
     }
 }
 
@@ -324,6 +330,15 @@ mod addition_tests {
             result.to_string(),
             "3219857349857439285798234981234809231850192485043985034295804329579083415710932857109485430925709128430219473210985732190857213908473092874039218470139284710923472310971"
         );
+    }
+
+    #[test]
+    fn add_two_negative_numbers() {
+        let x = BigNum::from_dec_str("-10");
+        let y = BigNum::from_dec_str("-10");
+        let result = x + y;
+
+        assert_eq!(result, BigNum::from_dec_str("-20"));
     }
 
 }
