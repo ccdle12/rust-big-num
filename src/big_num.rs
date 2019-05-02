@@ -45,25 +45,24 @@ impl PartialEq for BigNum {
 }
 
 impl BigNum {
-    /// Takes a decimal string representation, parses and returns as a BigNum.
+    /// Takes a base 10 decimal string representation, parses and returns as a BigNum.
     pub fn from_dec_str(input: &str) -> BigNum {
         let mut num: BigDigit;
+        let slice: &str;
         let mut sign = Sign::Positive;
 
-        // TODO: can this be made without duplication?
-        if input.starts_with('-') {
-            sign = Sign::Negative;
-            num = input
-                .chars()
-                .skip(1)
-                .map(|x| x.to_digit(RADIX).expect("cannot pass non digits") as DigitPrimitive)
-                .collect();
-        } else {
-            num = input
-                .chars()
-                .map(|x| x.to_digit(RADIX).expect("cannot pass non digits") as DigitPrimitive)
-                .collect();
+        match input.starts_with('-') {
+            true => {
+                sign = Sign::Negative;
+                slice = &input[1..];
+            }
+            _ => slice = &input,
         }
+
+        num = slice
+            .chars()
+            .map(|x| x.to_digit(RADIX).expect("cannot pass non digits") as DigitPrimitive)
+            .collect();
 
         // Num is stored in reverse order *little endian*, easier for arithmetic.
         num.reverse();
