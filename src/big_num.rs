@@ -3,7 +3,6 @@ use crate::helper::{
     RADIX,
 };
 use rand::Rng;
-use std::cmp;
 use std::cmp::Ordering::{self, Equal};
 use std::fmt;
 use std::ops::{Add, Sub};
@@ -370,6 +369,7 @@ mod subtraction_tests {
 #[cfg(test)]
 mod comparison_tests {
     use super::*;
+    use std::cmp;
 
     #[test]
     fn compare_1() {
