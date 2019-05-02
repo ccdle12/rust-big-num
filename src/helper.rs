@@ -1,6 +1,7 @@
 use crate::big_num::{BigNum, Sign};
 use std::cmp::Ordering::{self, Equal, Greater, Less};
 
+// TODO: (ccdle12) refactor everything to be only public in the crate.
 /// DigitPrimitive type used in the BigDigit type.
 pub type DigitPrimitive = u8;
 
@@ -56,7 +57,7 @@ pub(crate) fn add_big_digits(x: &BigDigit, y: &BigDigit) -> BigDigit {
     }
 
     // Clear any leading zeroes.
-    remove_leading_zeroes(&mut result);
+    result = remove_leading_zeroes(result);
 
     result
 }
@@ -106,7 +107,7 @@ pub(crate) fn sub_big_digits(minuend: &BigDigit, addend: &BigDigit) -> BigDigit 
         carry = 0;
     }
 
-    remove_leading_zeroes(&mut result);
+    result = remove_leading_zeroes(result);
 
     result
 }
@@ -174,14 +175,38 @@ fn sign_switch(b: bool, positive_ord: Ordering) -> Ordering {
 }
 
 /// A helper function to remove any leading zeroes from a BigDigit.
-pub fn remove_leading_zeroes(num: &mut BigDigit) {
-    // This is a preferrable to using iter().rev(), since we will be unable
-    // to use a mutable and immutable reference together.
-    for i in (0..num.len()).rev() {
-        if num[i] == 0 {
-            num.remove(i);
+pub fn remove_leading_zeroes(mut num: BigDigit) -> BigDigit {
+    // TODO: very hacky for now, enables return of 0 and adding = positive + negative.
+    let mut slice_index = 0;
+    num.reverse();
+
+    for (i, x) in num.iter().enumerate() {
+        // If i is already the same as the num length, meaning most likely
+        // already 0, return it.
+        if i == num.len() {
+            return num;
+        }
+
+        // This catches whether we are removing all 0s, so we just need to return
+        // the last 0.
+        if slice_index + 1 == num.len() {
+            break;
+        }
+
+        // Removes leading zeroes from a non-zero number.
+        if *x == 0 {
+            slice_index = i + 1;
         } else {
             break;
         }
     }
+
+    // Create a slice of the vector, excluding leading zeroes.
+    let slice = &num[slice_index..];
+
+    // Create a BigDigit, reverse it and return.
+    let mut result: BigDigit = slice.iter().map(|x| *x as DigitPrimitive).collect();
+    result.reverse();
+
+    result
 }
