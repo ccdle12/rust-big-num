@@ -155,13 +155,39 @@ impl Sub for BigNum {
     type Output = BigNum;
 
     fn sub(self, other: BigNum) -> BigNum {
-        // Assigning minuend and addend, helpful when flagging for negative
-        // number.
-        //
-        // sub_big_digits(minuend, addend).
-        let (num, sign): (BigDigit, Sign) = match self < other {
-            true => (sub_big_digits(&other.num, &self.num), Sign::Negative),
-            false => (sub_big_digits(&self.num, &other.num), Sign::Positive),
+        // Finds the correct arm to perform subtraction, matches on the Sign
+        // of each BigNum.
+        let (num, sign): (BigDigit, Sign) = match (&self.sign, &other.sign) {
+            // Standard.
+            (Sign::Positive, Sign::Positive) => {
+                let (m, a, s) = match self < other {
+                    true => (&other.num, &self.num, Sign::Negative),
+                    false => (&self.num, &other.num, Sign::Positive),
+                };
+
+                (sub_big_digits(m, a), s)
+            }
+
+            // Two Negatives.
+            (Sign::Negative, Sign::Negative) => {
+                let (m, a, s) = match compare_big_digit(&self.num, &other.num) {
+                    Ordering::Less => (&other.num, &self.num, Sign::Positive),
+                    Ordering::Equal => (&self.num, &other.num, Sign::Positive),
+                    Ordering::Greater => (&self.num, &other.num, Sign::Negative),
+                };
+
+                (sub_big_digits(m, a), s)
+            }
+
+            // Negative minus Positive.
+            (Sign::Negative, Sign::Positive) => {
+                (add_big_digits(&self.num, &other.num), Sign::Negative)
+            }
+
+            // Positive minus Negative.
+            (Sign::Positive, Sign::Negative) => {
+                (add_big_digits(&self.num, &other.num), Sign::Positive)
+            }
         };
 
         BigNum { num, sign }
@@ -436,6 +462,60 @@ mod subtraction_tests {
         let result = x - y;
 
         assert_eq!(result, BigNum::from_dec_str("-481902347912387592138041235701005891160899266121619999890298000589090390554250880999991371849012"));
+    }
+
+    #[test]
+    fn subtraction_negative_4() {
+        let x = BigNum::from_dec_str("-10");
+        let y = BigNum::from_dec_str("-10");
+        let result = x - y;
+
+        assert_eq!(result, BigNum::from_dec_str("0"));
+    }
+
+    #[test]
+    fn subtraction_negative_5() {
+        let x = BigNum::from_dec_str("-12");
+        let y = BigNum::from_dec_str("-10");
+        let result = x - y;
+
+        assert_eq!(result, BigNum::from_dec_str("-2"));
+    }
+
+    #[test]
+    fn subtraction_negative_6() {
+        let x = BigNum::from_dec_str("-12");
+        let y = BigNum::from_dec_str("10");
+        let result = x - y;
+
+        assert_eq!(result, BigNum::from_dec_str("-22"));
+    }
+
+    #[test]
+    fn subtraction_negative_7() {
+        let x = BigNum::from_dec_str("12");
+        let y = BigNum::from_dec_str("-22");
+        let result = x - y;
+
+        assert_eq!(result, BigNum::from_dec_str("34"));
+    }
+
+    #[test]
+    fn subtraction_negative_8() {
+        let x = BigNum::from_dec_str("12");
+        let y = BigNum::from_dec_str("-22");
+        let result = x - y;
+
+        assert_eq!(result, BigNum::from_dec_str("34"));
+    }
+
+    #[test]
+    fn subtraction_negative_9() {
+        let x = BigNum::from_dec_str("-22");
+        let y = BigNum::from_dec_str("-23");
+        let result = x - y;
+
+        assert_eq!(result, BigNum::from_dec_str("1"));
     }
 }
 

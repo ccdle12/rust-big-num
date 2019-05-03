@@ -74,6 +74,8 @@ pub(crate) fn sub_big_digits(minuend: &BigDigit, addend: &BigDigit) -> BigDigit 
         match (iter_1.next(), iter_2.next()) {
             (None, None) => break,
             (Some(m), Some(a)) => {
+                println!("m: {}", *m);
+                println!("a: {}", *a);
                 if m == a && carry > 0 || m < a && carry > 0 {
                     result.push(((*m + 10) - a) - carry);
                     continue;
