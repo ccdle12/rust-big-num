@@ -110,40 +110,37 @@ impl Add for BigNum {
     type Output = BigNum;
 
     fn add(self, other: BigNum) -> BigNum {
-        // Checks each combination of adding positive and negative numbers.
         let (num, sign): (BigDigit, Sign) = match (self.sign, other.sign) {
             // Standard.
             (Sign::Positive, Sign::Positive) => {
-                let num = add_big_digits(&self.num, &other.num);
-                (num, Sign::Positive)
+                (add_big_digits(&self.num, &other.num), Sign::Positive)
             }
 
             // Negative number addition.
             (Sign::Negative, Sign::Negative) => {
-                let num = add_big_digits(&self.num, &other.num);
-                (num, Sign::Negative)
+                (add_big_digits(&self.num, &other.num), Sign::Negative)
             }
 
             // Negative plus Positive.
             (Sign::Negative, Sign::Positive) => {
-                let (num, sign): (BigDigit, Sign) = match compare_big_digit(&self.num, &other.num) {
+                let (n, s) = match compare_big_digit(&self.num, &other.num) {
                     Ordering::Less => (sub_big_digits(&other.num, &self.num), Sign::Positive),
                     Ordering::Equal => (sub_big_digits(&self.num, &other.num), Sign::Positive),
                     Ordering::Greater => (sub_big_digits(&self.num, &other.num), Sign::Negative),
                 };
 
-                (num, sign)
+                (n, s)
             }
 
             // Positive plus Negative.
             (Sign::Positive, Sign::Negative) => {
-                let (num, sign): (BigDigit, Sign) = match compare_big_digit(&self.num, &other.num) {
+                let (n, s) = match compare_big_digit(&self.num, &other.num) {
                     Ordering::Less => (sub_big_digits(&other.num, &self.num), Sign::Negative),
                     Ordering::Equal => (sub_big_digits(&self.num, &other.num), Sign::Positive),
                     Ordering::Greater => (sub_big_digits(&self.num, &other.num), Sign::Positive),
                 };
 
-                (num, sign)
+                (n, s)
             }
         };
 
@@ -155,8 +152,6 @@ impl Sub for BigNum {
     type Output = BigNum;
 
     fn sub(self, other: BigNum) -> BigNum {
-        // Finds the correct arm to perform subtraction, matches on the Sign
-        // of each BigNum.
         let (num, sign): (BigDigit, Sign) = match (&self.sign, &other.sign) {
             // Standard.
             (Sign::Positive, Sign::Positive) => {
