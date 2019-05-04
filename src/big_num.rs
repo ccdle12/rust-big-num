@@ -8,8 +8,8 @@ use std::cmp::Ordering::{self, Equal};
 use std::fmt;
 use std::ops::{Add, Sub};
 
-/// BigNum is the main struct that represents a big number. It holds a BigDigit
-/// (Vec) of bytes and is capable of representing positive and negative numbers.
+/// BigNum is the struct that represents a big number. It holds a BigDigit
+/// (Vec) of bytes and an Enum Sign, to represent a positive or negative number.
 #[derive(Eq, Debug)]
 pub struct BigNum {
     // The following fields should only be public within the crate.
