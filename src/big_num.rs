@@ -1,7 +1,8 @@
-use crate::helper::{
-    add_big_digits, compare_big_digit, compare_num, remove_leading_zeroes, sub_big_digits,
-    BigDigit, DigitPrimitive, RADIX,
+use crate::big_digit::{
+    add_big_digits, compare_big_digit, remove_leading_zeroes, sub_big_digits, BigDigit,
+    DigitPrimitive,
 };
+use crate::helper::{compare_num, RADIX};
 use rand::Rng;
 use std::cmp::Ordering::{self, Equal};
 use std::fmt;
