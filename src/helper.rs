@@ -57,9 +57,7 @@ pub(crate) fn add_big_digits(x: &BigDigit, y: &BigDigit) -> BigDigit {
     }
 
     // Clear any leading zeroes.
-    result = remove_leading_zeroes(result);
-
-    result
+    remove_leading_zeroes(result)
 }
 
 // TODO: (ccdle12) Separate Big Digit and its functions to own file.
@@ -74,36 +72,35 @@ pub(crate) fn sub_big_digits(minuend: &BigDigit, addend: &BigDigit) -> BigDigit 
         match (iter_1.next(), iter_2.next()) {
             (None, None) => break,
             (Some(m), Some(a)) => {
-                println!("m: {}", *m);
-                println!("a: {}", *a);
-                if m == a && carry > 0 || m < a && carry > 0 {
-                    result.push(((*m + 10) - a) - carry);
-                    continue;
-                }
-
                 // Add 10 to enable subtraction of a lower value.
-                if m < a {
-                    result.push((*m + 10) - a);
+                // We will end up with overflow if m equals a -  carry.
+                if m < a || m == a && carry == 1 {
+                    result.push(((m + 10) - carry) - a);
                     carry = 1;
                     continue;
                 }
 
-                // Calculate result at column.
-                if carry > 0 {
-                    result.push((*m - a) - carry);
-                } else {
-                    result.push(*m - a);
-                }
-
+                result.push((m - carry) - a);
                 carry = 0;
             }
             (Some(m), None) => {
-                result.push(*m - carry);
-                carry = 0;
+                // TODO: Clean up.
+                if *m == 0 && carry > 0 {
+                    result.push((*m + 10) - carry);
+                    carry = 1;
+                } else {
+                    result.push(m - carry);
+                    carry = 0;
+                }
             }
             (None, Some(a)) => {
-                result.push(*a - carry);
-                carry = 0;
+                if *a == 0 && carry > 0 {
+                    result.push((*a + 10) - carry);
+                    carry = 1;
+                } else {
+                    result.push(a - carry);
+                    carry = 0;
+                }
             }
         }
     }

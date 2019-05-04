@@ -196,13 +196,13 @@ mod init_tests {
     #[test]
     #[should_panic]
     fn dec_str_1() {
-        let x = BigNum::from_dec_str("sfdafs");
+        let _x = BigNum::from_dec_str("sfdafs");
     }
 
     #[test]
     #[should_panic]
     fn dec_str_2() {
-        let x = BigNum::from_dec_str("-123asdz!$");
+        let _x = BigNum::from_dec_str("-123asdz!$");
     }
 }
 
@@ -428,6 +428,48 @@ mod subtraction_tests {
     }
 
     #[test]
+    fn subtraction_7() {
+        let x = BigNum::from_dec_str("10000");
+        let y = BigNum::from_dec_str("1000");
+        let result = x - y;
+
+        assert_eq!(result, BigNum::from_dec_str("9000"));
+    }
+
+    #[test]
+    fn subtraction_8() {
+        let x = BigNum::from_dec_str("100000000000000000000000000000000000000000000");
+        let y = BigNum::from_dec_str("1000000000000000000000000000000000000000");
+        let result = x - y;
+
+        assert_eq!(
+            result,
+            BigNum::from_dec_str("99999000000000000000000000000000000000000000")
+        )
+    }
+
+    #[test]
+    fn subtraction_9() {
+        let x = BigNum::from_dec_str("35682731569231876589712356982317493218649832176589237164873216489137269832159832164812376493182746389217463918246789123463918246812347698123764983216589");
+        let y = BigNum::from_dec_str("123813586321094857132985073219085742310956329817469321087493812740923875109326518273653218795613928746328197461239875612378563128975");
+        let result = x - y;
+
+        assert_eq!(
+            result,
+            BigNum::from_dec_str("35682731569231876589588543395996398361516847103370151422562260159319800511072338352071452618073419870943810699451175194717590049351107822511386420087614")
+        )
+    }
+
+    // #[test]
+    // fn subtraction_10() {
+    //     let x = BigNum::from_dec_str("-58923");
+    //     let y = BigNum::from_dec_str("-58632");
+    //     let result = x - y;
+    //
+    //     assert_eq!(result, BigNum::from_dec_str("291"))
+    // }
+
+    #[test]
     fn subtraction_negative_1() {
         let x = BigNum::from_dec_str("100");
         let y = BigNum::from_dec_str("102");
@@ -511,6 +553,95 @@ mod subtraction_tests {
         let result = x - y;
 
         assert_eq!(result, BigNum::from_dec_str("1"));
+    }
+
+    #[test]
+    fn subtraction_negative_10() {
+        // Big number, (Negative, Negative).
+        let x = BigNum::from_dec_str("-123813586321094857132985073219085742310956329817469321087493812740923875109326518273653218795613928746328197461239875612378563128975");
+        let y = BigNum::from_dec_str("-35682731569231876589712356982317493218649832176589237164873216489137269832159832164812376493182746389217463918246789123463918246812347698123764983216589123746398271461239846");
+        let result = x - y;
+
+        assert_eq!(result, BigNum::from_dec_str("35682731569231876589712356982317493218649708363002916070016083504064050746417521208482559023861658895404722994371679796945644593593552084195018655019127883870785892898110871"));
+    }
+
+    #[test]
+    fn subtraction_negative_11() {
+        // Big number, (Negative, Negative).
+        let x = BigNum::from_dec_str("-1000000000000000000000000000000000000000");
+        let y = BigNum::from_dec_str("-100000000000000000000000000000000000000000000");
+        let result = x - y;
+
+        assert_eq!(
+            result,
+            BigNum::from_dec_str("99999000000000000000000000000000000000000000")
+        );
+    }
+
+    #[test]
+    fn subtraction_negative_12() {
+        // Big number, (Positive, Negative).
+        let x = BigNum::from_dec_str(
+            "9138264019283749018324719023856390218471329048731290481092384731024",
+        );
+        let y = BigNum::from_dec_str("-5427319802471392856189273470938124713289564329184792301847123904723190462138947136298746");
+        let result = x - y;
+
+        assert_eq!(
+            result,
+            BigNum::from_dec_str("5427319802471392856198411734957408462307889048208648692065595233771921752620039521029770")
+        );
+    }
+
+    #[test]
+    fn subtraction_negative_13() {
+        // Big number, (Positive, Negative).
+        let x = BigNum::from_dec_str(
+            "9138264019283749018324719023856390218471329048731290481092384731024",
+        );
+        let y = BigNum::from_dec_str("-542731980247139285618927347093812471");
+        let result = x - y;
+
+        assert_eq!(
+            result,
+            BigNum::from_dec_str(
+                "9138264019283749018324719023856932950451576188016909408439478543495"
+            )
+        );
+    }
+
+    #[test]
+    fn subtraction_negative_14() {
+        // Big number, (Negative, Positive).
+        let x = BigNum::from_dec_str(
+            "-9138264019283749018324719023856390218471329048731290481092384731024",
+        );
+        let y = BigNum::from_dec_str("12542731980247139285618927347093812471");
+        let result = x - y;
+
+        assert_eq!(
+            result,
+            BigNum::from_dec_str(
+                "-9138264019283749018324719023868932950451576188016909408439478543495"
+            )
+        );
+    }
+
+    #[test]
+    fn subtraction_negative_15() {
+        // Big number, (Negative, Positive).
+        let x = BigNum::from_dec_str(
+            "-9138264019283749018324719023856390218471329048731290481092384731024",
+        );
+        let y = BigNum::from_dec_str("87568716589231746893124693812746312894763129846132984712542731980247139285618927347093812471");
+        let result = x - y;
+
+        assert_eq!(
+            result,
+            BigNum::from_dec_str(
+                "-87568716589231746893124702951010332178512148170852008568932950451576188016909408439478543495"
+            )
+        );
     }
 }
 
