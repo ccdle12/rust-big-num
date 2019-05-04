@@ -17,8 +17,7 @@ pub struct BigNum {
     pub(crate) sign: Sign,
 }
 
-/// Sign is an enum to be used identifying whether a number is positive or
-/// negative.
+/// Sign is an enum identifying whether a number is positive or negative.
 #[derive(PartialEq, Eq, Debug)]
 pub enum Sign {
     Positive,
