@@ -207,16 +207,16 @@ impl Mul for BigNum {
     // Space Complexity: O(n) *smaller number length*
     fn mul(self, other: BigNum) -> BigNum {
         //1. Find bigger and smaller num.
-        let (big, small): (BigNum, BigNum) = match self < other {
-            true => (other, self),
-            _ => (self, other),
+        let (big, small): (BigNum, BigNum) = match other < self {
+            true => (self, other),
+            _ => (other, self),
         };
 
-        // 1.5 Create a vector of the producst to add at the end.
+        // 1.5 Create a vector of the products to add at the end.
         let mut products: Vec<BigNum> = vec![];
 
         // 2. For loop over small num.
-        for (i, small_num) in small.num.iter().enumerate() {
+        for (i, s) in small.num.iter().enumerate() {
             let mut num: BigDigit = vec![];
 
             // 2.5 Adding zeroes according to the index of i.
@@ -224,10 +224,22 @@ impl Mul for BigNum {
                 num.push(0);
             }
 
+            // 2.6 Set a carry.
+            let mut carry = 0;
+
             // 3. For loop over big num.
-            for big_num in &big.num {
+            for b in &big.num {
                 // 5. Multiply each small[i] * big[j].
-                let r = small_num * big_num;
+                let p = s * b;
+                let r = (p + carry) % 10;
+
+                // 5.1 Update carry.
+                if p >= 10 {
+                    carry = p / 10;
+                } else {
+                    carry = 0;
+                }
+
                 num.push(r);
             }
 
@@ -824,6 +836,15 @@ mod multiplication_tests {
         let result = x * y;
 
         assert_eq!(result, BigNum::from_dec_str("484"))
+    }
+
+    #[test]
+    fn multiply_num_2() {
+        let x = BigNum::from_dec_str("1340");
+        let y = BigNum::from_dec_str("25");
+        let result = x * y;
+
+        assert_eq!(result, BigNum::from_dec_str("33500"));
     }
 }
 
