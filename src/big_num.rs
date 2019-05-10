@@ -206,6 +206,13 @@ impl Mul for BigNum {
     // Time Complexity: O(n^2)
     // Space Complexity: O(n) *smaller number length*
     fn mul(self, other: BigNum) -> BigNum {
+        let sign = match (&self.sign, &other.sign) {
+            (Sign::Negative, Sign::Positive) => Sign::Negative,
+            (Sign::Positive, Sign::Negative) => Sign::Negative,
+            _ => Sign::Positive,
+        };
+        println!("Sign: {:?}", sign);
+
         //1. Find bigger and smaller num.
         let (big, small): (BigNum, BigNum) = match other < self {
             true => (self, other),
@@ -252,20 +259,20 @@ impl Mul for BigNum {
         }
 
         // 7. Calculate the sum of the products and return the result.
-        let result = {
-            let mut sum: BigNum = BigNum {
-                num: vec![],
-                sign: Sign::Positive,
-            };
-
-            for i in products {
-                sum += i;
-            }
-
-            sum
+        let mut sum: BigNum = BigNum {
+            num: vec![],
+            sign: Sign::Positive,
         };
 
-        result
+        for i in products {
+            sum += i;
+        }
+
+        // TODO: (ccdle12) Hack, sign is overwritten by add assign,
+        // Need to look into whether the sign should be fixed there.
+        sum.sign = sign;
+
+        sum
     }
 }
 
@@ -884,6 +891,33 @@ mod multiplication_tests {
             result,
             BigNum::from_dec_str("100572996730389364062234072387412841615285436718705912203381347263989753335944161612371099226110078590669755347369460835968350246321130281057574216695867412490180366255")
         );
+    }
+
+    #[test]
+    fn multiply_negative_num_1() {
+        let x = BigNum::from_dec_str("-2");
+        let y = BigNum::from_dec_str("-2");
+        let result = x * y;
+
+        assert_eq!(result, BigNum::from_dec_str("4"));
+    }
+
+    #[test]
+    fn multiply_negative_num_2() {
+        let x = BigNum::from_dec_str("-2");
+        let y = BigNum::from_dec_str("2");
+        let result = x * y;
+
+        assert_eq!(result, BigNum::from_dec_str("-4"));
+    }
+
+    #[test]
+    fn multiply_negative_num_3() {
+        let x = BigNum::from_dec_str("4893127592136582937465123984793208473290864237814623981476091324723915861283762389473129468372");
+        let y = BigNum::from_dec_str("-912837563287964812376432198756382975632891746372814123");
+        let result = x * y;
+
+        assert_eq!(result, BigNum::from_dec_str("-4466630668063064900786599737984533506198418683423224939762262933376055878940153008051450382128756446622753939224466880576458225393816052328563417756"));
     }
 }
 
