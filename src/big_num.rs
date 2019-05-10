@@ -6,7 +6,7 @@ use crate::helper::{compare_num, RADIX};
 use rand::Rng;
 use std::cmp::Ordering::{self, Equal};
 use std::fmt;
-use std::ops::{Add, Sub};
+use std::ops::{Add, AddAssign, Mul, Sub};
 
 /// BigNum is the struct that represents a big number. It holds a BigDigit
 /// (Vec) of bytes and an Enum Sign, to represent a positive or negative number.
@@ -144,6 +144,12 @@ impl Add for BigNum {
     }
 }
 
+impl AddAssign for BigNum {
+    fn add_assign(&mut self, other: BigNum) {
+        add_big_digits(&self.num, &other.num);
+    }
+}
+
 impl Sub for BigNum {
     type Output = BigNum;
 
@@ -182,6 +188,60 @@ impl Sub for BigNum {
         };
 
         BigNum { num, sign }
+    }
+}
+
+impl Mul for BigNum {
+    type Output = BigNum;
+
+    fn mul(self, other: BigNum) -> BigNum {
+        //1. Find bigger and smaller num.
+        let (big, small): (BigNum, BigNum) = match self < other {
+            true => (other, self),
+            _ => (self, other),
+        };
+
+        // 1.5 Create a vector of the producst to add at the end.
+        let mut products: Vec<BigNum> = vec![];
+
+        // 2. For loop over small num.
+        for (i, small_num) in small.num.iter().enumerate() {
+            let mut num: BigDigit = vec![];
+
+            // 3. For loop over big num.
+            for (_j, big_num) in big.num.iter().enumerate() {
+                // 4. Adding zeroes according to the index of i.
+                for _x in 0..i {
+                    num.push(0);
+                }
+
+                // 5. Multiply each small[i] * big[j].
+                let r = small_num * big_num;
+                num.push(r);
+            }
+
+            //6. Create a BigNum and add to the vector of products.
+            products.push(BigNum {
+                num,
+                sign: Sign::Positive,
+            })
+        }
+
+        // 7. Calculate the sum of the products and return the result.
+        let result = {
+            let mut sum: BigNum = BigNum {
+                num: vec![],
+                sign: Sign::Positive,
+            };
+
+            for i in products {
+                sum += i;
+            }
+
+            sum
+        };
+
+        result
     }
 }
 
