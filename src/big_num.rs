@@ -200,6 +200,11 @@ impl Sub for BigNum {
 impl Mul for BigNum {
     type Output = BigNum;
 
+    // TODO: (ccdle12) WIP - first pass using long division.
+    // Needs refactor.
+    // Needs to handle large numbers and positive and negative.
+    // Time Complexity: O(n^2)
+    // Space Complexity: O(n) *smaller number length*
     fn mul(self, other: BigNum) -> BigNum {
         //1. Find bigger and smaller num.
         let (big, small): (BigNum, BigNum) = match self < other {
@@ -214,13 +219,13 @@ impl Mul for BigNum {
         for (i, small_num) in small.num.iter().enumerate() {
             let mut num: BigDigit = vec![];
 
+            // 2.5 Adding zeroes according to the index of i.
+            for _x in 0..i {
+                num.push(0);
+            }
+
             // 3. For loop over big num.
             for (_j, big_num) in big.num.iter().enumerate() {
-                // 4. Adding zeroes according to the index of i.
-                for _x in 0..i {
-                    num.push(0);
-                }
-
                 // 5. Multiply each small[i] * big[j].
                 let r = small_num * big_num;
                 num.push(r);
@@ -241,6 +246,7 @@ impl Mul for BigNum {
             };
 
             for i in products {
+                println!("Each i: {}", i);
                 sum += i;
             }
 
