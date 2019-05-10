@@ -211,7 +211,6 @@ impl Mul for BigNum {
             (Sign::Positive, Sign::Negative) => Sign::Negative,
             _ => Sign::Positive,
         };
-        println!("Sign: {:?}", sign);
 
         //1. Find bigger and smaller num.
         let (big, small): (BigNum, BigNum) = match other < self {
