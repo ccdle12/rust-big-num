@@ -207,8 +207,7 @@ impl Mul for BigNum {
     // Space Complexity: O(n) *smaller number length*
     fn mul(self, other: BigNum) -> BigNum {
         let sign = match (&self.sign, &other.sign) {
-            (Sign::Negative, Sign::Positive) => Sign::Negative,
-            (Sign::Positive, Sign::Negative) => Sign::Negative,
+            (Sign::Negative, Sign::Positive) | (Sign::Positive, Sign::Negative) => Sign::Negative,
             _ => Sign::Positive,
         };
 
