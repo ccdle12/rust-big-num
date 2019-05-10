@@ -136,8 +136,8 @@ impl Add for BigNum {
             (Sign::Positive, Sign::Negative) => {
                 let (n, s) = match compare_big_digit(&self.num, &other.num) {
                     Ordering::Less => (sub_big_digits(&other.num, &self.num), Sign::Negative),
-                    Ordering::Equal => (sub_big_digits(&self.num, &other.num), Sign::Positive),
-                    Ordering::Greater => (sub_big_digits(&self.num, &other.num), Sign::Positive),
+                    _ => (sub_big_digits(&self.num, &other.num), Sign::Positive),
+                    // Ordering::Greater => (sub_big_digits(&self.num, &other.num), Sign::Positive),
                 };
 
                 (n, s)
