@@ -225,7 +225,7 @@ impl Mul for BigNum {
             }
 
             // 3. For loop over big num.
-            for (_j, big_num) in big.num.iter().enumerate() {
+            for big_num in &big.num {
                 // 5. Multiply each small[i] * big[j].
                 let r = small_num * big_num;
                 num.push(r);
@@ -246,7 +246,6 @@ impl Mul for BigNum {
             };
 
             for i in products {
-                println!("Each i: {}", i);
                 sum += i;
             }
 
