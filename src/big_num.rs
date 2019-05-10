@@ -734,6 +734,20 @@ mod comparison_tests {
 }
 
 #[cfg(test)]
+mod multiplication_tests {
+    use super::*;
+
+    #[test]
+    fn multiply_num_1() {
+        let x = BigNum::from_dec_str("22");
+        let y = BigNum::from_dec_str("22");
+        let result = x * y;
+
+        assert_eq!(result, BigNum::from_dec_str("484"))
+    }
+}
+
+#[cfg(test)]
 mod random_number_tests {
     use super::*;
 
