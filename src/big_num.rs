@@ -239,6 +239,11 @@ impl Mul for BigNum {
                 num.push(r);
             }
 
+            // 3.5 Catch and push any lingering carry.
+            if carry > 0 {
+                num.push(carry);
+            }
+
             //6. Create a BigNum and add to the vector of products.
             products.push(BigNum {
                 num,
@@ -852,6 +857,18 @@ mod multiplication_tests {
         assert_eq!(
             result,
             BigNum::from_dec_str("662212109301471914132397293648632238845")
+        );
+    }
+
+    #[test]
+    fn multiply_num_4() {
+        let x = BigNum::from_dec_str("6152987634879162348791236598721364238194763987246123");
+        let y = BigNum::from_dec_str("321648921374632187946923174618293468972134623");
+        let result = x * y;
+
+        assert_eq!(
+            result,
+            BigNum::from_dec_str("1979101835990331754937671562297036147367539100298140580045536068871409701213464248540050590816629")
         );
     }
 }
