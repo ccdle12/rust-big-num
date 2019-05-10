@@ -56,7 +56,6 @@ impl BigNum {
             _ => (&input, Sign::Positive),
         };
 
-        // Iterate and map each char to a DigitPrimitive, returns as a BigDigit.
         let mut num: BigDigit = slice
             .chars()
             .map(|x| x.to_digit(RADIX).expect("cannot pass non digits") as DigitPrimitive)
@@ -92,12 +91,10 @@ impl BigNum {
     }
 }
 
-// fmt::Display implements to_string() for BigNum.
 impl fmt::Display for BigNum {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let mut num_str: String = self.num.iter().map(|x| x.to_string()).rev().collect();
 
-        // Check if the number is negative.
         if self.sign == Sign::Negative {
             num_str.insert(0, '-');
         }
@@ -137,7 +134,6 @@ impl Add for BigNum {
                 let (n, s) = match compare_big_digit(&self.num, &other.num) {
                     Ordering::Less => (sub_big_digits(&other.num, &self.num), Sign::Negative),
                     _ => (sub_big_digits(&self.num, &other.num), Sign::Positive),
-                    // Ordering::Greater => (sub_big_digits(&self.num, &other.num), Sign::Positive),
                 };
 
                 (n, s)
