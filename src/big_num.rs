@@ -231,14 +231,10 @@ impl Mul for BigNum {
             for b in &big.num {
                 // 5. Multiply each small[i] * big[j].
                 let p = s * b;
-                let r = (p + carry) % 10;
+                let r = (p % 10) + carry;
 
                 // 5.1 Update carry.
-                if p >= 10 {
-                    carry = p / 10;
-                } else {
-                    carry = 0;
-                }
+                carry = p / 10;
 
                 num.push(r);
             }
@@ -845,6 +841,18 @@ mod multiplication_tests {
         let result = x * y;
 
         assert_eq!(result, BigNum::from_dec_str("33500"));
+    }
+
+    #[test]
+    fn multiply_num_3() {
+        let x = BigNum::from_dec_str("1239487123947329150872130942342315");
+        let y = BigNum::from_dec_str("534263");
+        let result = x * y;
+
+        assert_eq!(
+            result,
+            BigNum::from_dec_str("662212109301471914132397293648632238845")
+        );
     }
 }
 
