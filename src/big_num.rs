@@ -144,9 +144,15 @@ impl Add for BigNum {
     }
 }
 
+// TODO: (ccdle12) WIP: needs extensive testing to cover positive, negative etc..
 impl AddAssign for BigNum {
     fn add_assign(&mut self, other: BigNum) {
-        add_big_digits(&self.num, &other.num);
+        let num = add_big_digits(&self.num, &other.num);
+
+        *self = BigNum {
+            num,
+            sign: Sign::Positive,
+        }
     }
 }
 
@@ -420,6 +426,15 @@ mod addition_tests {
                 "-812365789675552856343435461434084846490836114992261333174186391811164843953653829547362917952562656725107989087793996296910088009997599952580522009763437101522370816188710669974741622937505418070985"
             )
         );
+    }
+
+    #[test]
+    fn add_assign_1() {
+        let mut x = BigNum::from_dec_str("10");
+        let y = BigNum::from_dec_str("10");
+        x += y;
+
+        assert_eq!(x, BigNum::from_dec_str("20"));
     }
 }
 
