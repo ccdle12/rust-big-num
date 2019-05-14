@@ -200,63 +200,51 @@ impl Sub for BigNum {
 impl Mul for BigNum {
     type Output = BigNum;
 
-    // TODO: (ccdle12) WIP - first pass using long division.
-    // Needs refactor.
-    // Needs to handle large numbers and positive and negative.
-    // Time Complexity: O(n^2)
-    // Space Complexity: O(n) *smaller number length*
     fn mul(self, other: BigNum) -> BigNum {
         let sign = match (&self.sign, &other.sign) {
             (Sign::Negative, Sign::Positive) | (Sign::Positive, Sign::Negative) => Sign::Negative,
             _ => Sign::Positive,
         };
 
-        //1. Find bigger and smaller num.
+        // Find bigger and smaller num.
         let (big, small): (BigNum, BigNum) = match other < self {
             true => (self, other),
             _ => (other, self),
         };
 
-        // 1.5 Create a vector of the products to add at the end.
+        // Create a vector of the products to add at the end.
         let mut products: Vec<BigNum> = vec![];
 
-        // 2. For loop over small num.
         for (i, s) in small.num.iter().enumerate() {
             let mut num: BigDigit = vec![];
 
-            // 2.5 Adding zeroes according to the index of i.
+            // Adding zeroes according to the index of i.
             for _x in 0..i {
                 num.push(0);
             }
 
-            // 2.6 Set a carry.
             let mut carry = 0;
 
-            // 3. For loop over big num.
             for b in &big.num {
-                // 5. Multiply each small[i] * big[j].
                 let p = s * b;
                 let r = (p % 10) + carry;
 
-                // 5.1 Update carry.
                 carry = p / 10;
 
                 num.push(r);
             }
 
-            // 3.5 Catch and push any lingering carry.
             if carry > 0 {
                 num.push(carry);
             }
 
-            //6. Create a BigNum and add to the vector of products.
             products.push(BigNum {
                 num,
                 sign: Sign::Positive,
             })
         }
 
-        // 7. Calculate the sum of the products and return the result.
+        // Calculate the sum of the products and return the result.
         let mut sum: BigNum = BigNum {
             num: vec![],
             sign: Sign::Positive,
@@ -266,8 +254,6 @@ impl Mul for BigNum {
             sum += i;
         }
 
-        // TODO: (ccdle12) Hack, sign is overwritten by add assign,
-        // Need to look into whether the sign should be fixed there.
         sum.sign = sign;
 
         sum
