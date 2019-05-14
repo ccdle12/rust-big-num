@@ -6,7 +6,7 @@ use crate::helper::{compare_num, RADIX};
 use rand::Rng;
 use std::cmp::Ordering::{self, Equal};
 use std::fmt;
-use std::ops::{Add, Sub};
+use std::ops::{Add, AddAssign, Mul, Sub};
 
 /// BigNum is the struct that represents a big number. It holds a BigDigit
 /// (Vec) of bytes and an Enum Sign, to represent a positive or negative number.
@@ -144,6 +144,18 @@ impl Add for BigNum {
     }
 }
 
+// TODO: (ccdle12) WIP: needs extensive testing to cover positive, negative etc..
+impl AddAssign for BigNum {
+    fn add_assign(&mut self, other: BigNum) {
+        let num = add_big_digits(&self.num, &other.num);
+
+        *self = BigNum {
+            num,
+            sign: Sign::Positive,
+        }
+    }
+}
+
 impl Sub for BigNum {
     type Output = BigNum;
 
@@ -182,6 +194,69 @@ impl Sub for BigNum {
         };
 
         BigNum { num, sign }
+    }
+}
+
+impl Mul for BigNum {
+    type Output = BigNum;
+
+    fn mul(self, other: BigNum) -> BigNum {
+        let sign = match (&self.sign, &other.sign) {
+            (Sign::Negative, Sign::Positive) | (Sign::Positive, Sign::Negative) => Sign::Negative,
+            _ => Sign::Positive,
+        };
+
+        // Find bigger and smaller num.
+        let (big, small): (BigNum, BigNum) = match other < self {
+            true => (self, other),
+            _ => (other, self),
+        };
+
+        // Create a vector of the products to add at the end.
+        let mut products: Vec<BigNum> = vec![];
+
+        for (i, s) in small.num.iter().enumerate() {
+            let mut num: BigDigit = vec![];
+
+            // Adding zeroes according to the index of i.
+            for _x in 0..i {
+                num.push(0);
+            }
+
+            let mut carry = 0;
+
+            for b in &big.num {
+                let p = s * b;
+                let r = (p % 10) + carry;
+
+                carry = p / 10;
+
+                num.push(r);
+            }
+
+            if carry > 0 {
+                num.push(carry);
+            }
+
+            products.push(BigNum {
+                num,
+                sign: Sign::Positive,
+            })
+        }
+
+        // Calculate the sum of the products and return the result.
+        let mut sum: BigNum = BigNum {
+            num: vec![],
+            sign: Sign::Positive,
+        };
+
+        for i in products {
+            sum += i;
+        }
+
+        sum.sign = sign;
+
+        sum
     }
 }
 
@@ -360,6 +435,15 @@ mod addition_tests {
                 "-812365789675552856343435461434084846490836114992261333174186391811164843953653829547362917952562656725107989087793996296910088009997599952580522009763437101522370816188710669974741622937505418070985"
             )
         );
+    }
+
+    #[test]
+    fn add_assign_1() {
+        let mut x = BigNum::from_dec_str("10");
+        let y = BigNum::from_dec_str("10");
+        x += y;
+
+        assert_eq!(x, BigNum::from_dec_str("20"));
     }
 }
 
@@ -730,6 +814,94 @@ mod comparison_tests {
         let y = BigNum::from_dec_str("-1204124124");
 
         assert!(x == y);
+    }
+}
+
+#[cfg(test)]
+mod multiplication_tests {
+    use super::*;
+
+    #[test]
+    fn multiply_num_1() {
+        let x = BigNum::from_dec_str("22");
+        let y = BigNum::from_dec_str("22");
+        let result = x * y;
+
+        assert_eq!(result, BigNum::from_dec_str("484"))
+    }
+
+    #[test]
+    fn multiply_num_2() {
+        let x = BigNum::from_dec_str("1340");
+        let y = BigNum::from_dec_str("25");
+        let result = x * y;
+
+        assert_eq!(result, BigNum::from_dec_str("33500"));
+    }
+
+    #[test]
+    fn multiply_num_3() {
+        let x = BigNum::from_dec_str("1239487123947329150872130942342315");
+        let y = BigNum::from_dec_str("534263");
+        let result = x * y;
+
+        assert_eq!(
+            result,
+            BigNum::from_dec_str("662212109301471914132397293648632238845")
+        );
+    }
+
+    #[test]
+    fn multiply_num_4() {
+        let x = BigNum::from_dec_str("6152987634879162348791236598721364238194763987246123");
+        let y = BigNum::from_dec_str("321648921374632187946923174618293468972134623");
+        let result = x * y;
+
+        assert_eq!(
+            result,
+            BigNum::from_dec_str("1979101835990331754937671562297036147367539100298140580045536068871409701213464248540050590816629")
+        );
+    }
+
+    #[test]
+    fn multiply_num_5() {
+        let x = BigNum::from_dec_str("5438927543875691275321980472398104713298563182756231908741293804729138561923047139284739284071");
+        let y = BigNum::from_dec_str(
+            "18491328652398756342876532948572319805732984564328752310984723198056342905",
+        );
+        let result = x * y;
+
+        assert_eq!(
+            result,
+            BigNum::from_dec_str("100572996730389364062234072387412841615285436718705912203381347263989753335944161612371099226110078590669755347369460835968350246321130281057574216695867412490180366255")
+        );
+    }
+
+    #[test]
+    fn multiply_negative_num_1() {
+        let x = BigNum::from_dec_str("-2");
+        let y = BigNum::from_dec_str("-2");
+        let result = x * y;
+
+        assert_eq!(result, BigNum::from_dec_str("4"));
+    }
+
+    #[test]
+    fn multiply_negative_num_2() {
+        let x = BigNum::from_dec_str("-2");
+        let y = BigNum::from_dec_str("2");
+        let result = x * y;
+
+        assert_eq!(result, BigNum::from_dec_str("-4"));
+    }
+
+    #[test]
+    fn multiply_negative_num_3() {
+        let x = BigNum::from_dec_str("4893127592136582937465123984793208473290864237814623981476091324723915861283762389473129468372");
+        let y = BigNum::from_dec_str("-912837563287964812376432198756382975632891746372814123");
+        let result = x * y;
+
+        assert_eq!(result, BigNum::from_dec_str("-4466630668063064900786599737984533506198418683423224939762262933376055878940153008051450382128756446622753939224466880576458225393816052328563417756"));
     }
 }
 
