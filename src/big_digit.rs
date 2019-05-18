@@ -53,6 +53,8 @@ pub fn add_big_digits(x: &BigDigit, y: &BigDigit) -> BigDigit {
     remove_leading_zeroes(result)
 }
 
+/// sub_big_digits is the implementation function to subtract two BigDigit types.
+/// The return is a new instance of a BigDigit.
 pub fn sub_big_digits(minuend: &BigDigit, addend: &BigDigit) -> BigDigit {
     let (mut result, mut carry) = (vec![], 0);
 
