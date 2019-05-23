@@ -1,6 +1,6 @@
 use crate::big_digit::{
-    add_big_digits, compare_big_digit, remove_leading_zeroes, sub_big_digits, BigDigit,
-    DigitPrimitive,
+    add_big_digits, compare_big_digit, mul_big_digits, remove_leading_zeroes, sub_big_digits,
+    BigDigit, DigitPrimitive,
 };
 use crate::helper::{compare_num, RADIX};
 use rand::Rng;
@@ -212,51 +212,10 @@ impl Mul for BigNum {
             _ => (other, self),
         };
 
-        // Create a vector of the products to add at the end.
-        let mut products: Vec<BigNum> = vec![];
+        // Multiply the big digits.
+        let num = mul_big_digits(&big.num, &small.num);
 
-        for (i, s) in small.num.iter().enumerate() {
-            let mut num: BigDigit = vec![];
-
-            // Adding zeroes according to the index of i.
-            for _x in 0..i {
-                num.push(0);
-            }
-
-            let mut carry = 0;
-
-            for b in &big.num {
-                let p = s * b;
-                let r = (p % 10) + carry;
-
-                carry = p / 10;
-
-                num.push(r);
-            }
-
-            if carry > 0 {
-                num.push(carry);
-            }
-
-            products.push(BigNum {
-                num,
-                sign: Sign::Positive,
-            })
-        }
-
-        // Calculate the sum of the products and return the result.
-        let mut sum: BigNum = BigNum {
-            num: vec![],
-            sign: Sign::Positive,
-        };
-
-        for i in products {
-            sum += i;
-        }
-
-        sum.sign = sign;
-
-        sum
+        BigNum { num, sign }
     }
 }
 
