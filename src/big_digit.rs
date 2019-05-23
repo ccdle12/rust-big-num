@@ -100,6 +100,44 @@ pub fn sub_big_digits(minuend: &BigDigit, addend: &BigDigit) -> BigDigit {
     remove_leading_zeroes(result)
 }
 
+pub fn mul_big_digits(big: &BigDigit, small: &BigDigit) -> BigDigit {
+    // Create a vector of the products to add at the end.
+    let mut products: Vec<BigDigit> = vec![];
+
+    for (i, s) in small.iter().enumerate() {
+        let mut num: BigDigit = vec![];
+        // Adding zeroes according to the index of i.
+        for _x in 0..i {
+            num.push(0);
+        }
+
+        let mut carry = 0;
+
+        for b in big {
+            let p = s * b;
+            let r = (p % 10) + carry;
+
+            carry = p / 10;
+
+            num.push(r);
+        }
+
+        if carry > 0 {
+            num.push(carry);
+        }
+
+        products.push(num)
+    }
+
+    let mut sum: BigDigit = vec![];
+
+    for i in products {
+        sum = add_big_digits(&i, &sum);
+    }
+
+    sum
+}
+
 /// compare_big_digit is a function that purely comapres BigDigits.
 pub fn compare_big_digit(x: &BigDigit, y: &BigDigit) -> Ordering {
     // Compare the lengths.
