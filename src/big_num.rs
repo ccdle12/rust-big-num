@@ -1,12 +1,19 @@
 use crate::big_digit::{
-    add_big_digits, compare_big_digits, div_big_digits, mul_big_digits, remove_leading_zeroes,
-    sub_big_digits, BigDigit, DigitPrimitive,
+    // add_big_digits, big_digit_from_str, compare_big_digits, div_big_digits, mul_big_digits,
+    add_big_digits,
+    big_digit_from_str,
+    compare_big_digits,
+    mul_big_digits,
+    remove_leading_zeroes,
+    sub_big_digits,
+    BigDigit,
 };
-use crate::helper::{compare_num, RADIX};
+use crate::helper::compare_num;
 use rand::Rng;
 use std::cmp::Ordering::{self, Equal};
 use std::fmt;
-use std::ops::{Add, AddAssign, Div, Mul, Sub};
+// use std::ops::{Add, AddAssign, Div, Mul, Sub};
+use std::ops::{Add, AddAssign, Mul, Sub};
 
 /// BigNum is the struct that represents a big number. It holds a BigDigit
 /// (Vec) of bytes and an Enum Sign, to represent a positive or negative number.
@@ -56,13 +63,7 @@ impl BigNum {
             _ => (&input, Sign::Positive),
         };
 
-        let mut num: BigDigit = slice
-            .chars()
-            .map(|x| x.to_digit(RADIX).expect("cannot pass non digits") as DigitPrimitive)
-            .collect();
-
-        // Num is stored in reverse order *little endian*, easier for arithmetic.
-        num.reverse();
+        let num = big_digit_from_str(slice);
 
         BigNum { num, sign }
     }
@@ -219,18 +220,18 @@ impl Mul for BigNum {
     }
 }
 
-impl Div for BigNum {
-    type Output = BigNum;
-
-    fn div(self, other: BigNum) -> BigNum {
-        let num = div_big_digits(&self.num, &other.num);
-
-        BigNum {
-            num,
-            sign: Sign::Positive,
-        }
-    }
-}
+// impl Div for BigNum {
+//     type Output = BigNum;
+//
+//     fn div(self, other: BigNum) -> BigNum {
+//         let num = div_big_digits(&self.num, &other.num);
+//
+//         BigNum {
+//             num,
+//             sign: Sign::Positive,
+//         }
+//     }
+// }
 
 #[cfg(test)]
 mod init_tests {
@@ -877,19 +878,19 @@ mod multiplication_tests {
     }
 }
 
-#[cfg(test)]
-mod division_tests {
-    use super::*;
-
-    #[test]
-    fn divide_num_1() {
-        let divisor = BigNum::from_dec_str("4");
-        let dividend = BigNum::from_dec_str("936");
-
-        let result = divisor / dividend;
-        assert_eq!(result, BigNum::from_dec_str("234"))
-    }
-}
+// #[cfg(test)]
+// mod division_tests {
+//     use super::*;
+//
+//     #[test]
+//     fn divide_num_1() {
+//         let divisor = BigNum::from_dec_str("4");
+//         let dividend = BigNum::from_dec_str("936");
+//
+//         let result = divisor / dividend;
+//         assert_eq!(result, BigNum::from_dec_str("234"))
+//     }
+// }
 
 #[cfg(test)]
 mod random_number_tests {
