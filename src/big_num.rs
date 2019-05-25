@@ -1,19 +1,10 @@
-use crate::big_digit::{
-    // add_big_digits, big_digit_from_str, compare_big_digits, div_big_digits, mul_big_digits,
-    add_big_digits,
-    big_digit_from_str,
-    compare_big_digits,
-    mul_big_digits,
-    remove_leading_zeroes,
-    sub_big_digits,
-    BigDigit,
-};
+use crate::big_digit;
+use crate::big_digit::BigDigit;
 use crate::helper::compare_num;
 use rand::Rng;
 use std::cmp::Ordering::{self, Equal};
 use std::fmt;
-// use std::ops::{Add, AddAssign, Div, Mul, Sub};
-use std::ops::{Add, AddAssign, Mul, Sub};
+use std::ops::{Add, AddAssign, Div, Mul, Sub};
 
 /// BigNum is the struct that represents a big number. It holds a BigDigit
 /// (Vec) of bytes and an Enum Sign, to represent a positive or negative number.
@@ -63,7 +54,7 @@ impl BigNum {
             _ => (&input, Sign::Positive),
         };
 
-        let num = big_digit_from_str(slice);
+        let num = big_digit::from_str(slice);
 
         BigNum { num, sign }
     }
@@ -78,7 +69,7 @@ impl BigNum {
                 num[i] = rand::thread_rng().gen_range(0, 10);
             }
 
-            num = remove_leading_zeroes(num);
+            num = big_digit::remove_leading_zeroes(num);
 
             let below_num = BigNum {
                 num,
@@ -111,20 +102,20 @@ impl Add for BigNum {
         let (num, sign): (BigDigit, Sign) = match (self.sign, other.sign) {
             // Standard.
             (Sign::Positive, Sign::Positive) => {
-                (add_big_digits(&self.num, &other.num), Sign::Positive)
+                (big_digit::add(&self.num, &other.num), Sign::Positive)
             }
 
             // Negative number addition.
             (Sign::Negative, Sign::Negative) => {
-                (add_big_digits(&self.num, &other.num), Sign::Negative)
+                (big_digit::add(&self.num, &other.num), Sign::Negative)
             }
 
             // Negative plus Positive.
             (Sign::Negative, Sign::Positive) => {
-                let (n, s) = match compare_big_digits(&self.num, &other.num) {
-                    Ordering::Less => (sub_big_digits(&other.num, &self.num), Sign::Positive),
-                    Ordering::Equal => (sub_big_digits(&self.num, &other.num), Sign::Positive),
-                    Ordering::Greater => (sub_big_digits(&self.num, &other.num), Sign::Negative),
+                let (n, s) = match big_digit::compare(&self.num, &other.num) {
+                    Ordering::Less => (big_digit::sub(&other.num, &self.num), Sign::Positive),
+                    Ordering::Equal => (big_digit::sub(&self.num, &other.num), Sign::Positive),
+                    Ordering::Greater => (big_digit::sub(&self.num, &other.num), Sign::Negative),
                 };
 
                 (n, s)
@@ -132,9 +123,9 @@ impl Add for BigNum {
 
             // Positive plus Negative.
             (Sign::Positive, Sign::Negative) => {
-                let (n, s) = match compare_big_digits(&self.num, &other.num) {
-                    Ordering::Less => (sub_big_digits(&other.num, &self.num), Sign::Negative),
-                    _ => (sub_big_digits(&self.num, &other.num), Sign::Positive),
+                let (n, s) = match big_digit::compare(&self.num, &other.num) {
+                    Ordering::Less => (big_digit::sub(&other.num, &self.num), Sign::Negative),
+                    _ => (big_digit::sub(&self.num, &other.num), Sign::Positive),
                 };
 
                 (n, s)
@@ -148,7 +139,7 @@ impl Add for BigNum {
 // TODO: (ccdle12) WIP: needs extensive testing to cover positive, negative etc..
 impl AddAssign for BigNum {
     fn add_assign(&mut self, other: BigNum) {
-        let num = add_big_digits(&self.num, &other.num);
+        let num = big_digit::add(&self.num, &other.num);
 
         *self = BigNum {
             num,
@@ -169,28 +160,28 @@ impl Sub for BigNum {
                     false => (&self.num, &other.num, Sign::Positive),
                 };
 
-                (sub_big_digits(m, a), s)
+                (big_digit::sub(m, a), s)
             }
 
             // Two Negatives.
             (Sign::Negative, Sign::Negative) => {
-                let (m, a, s) = match compare_big_digits(&self.num, &other.num) {
+                let (m, a, s) = match big_digit::compare(&self.num, &other.num) {
                     Ordering::Less => (&other.num, &self.num, Sign::Positive),
                     Ordering::Equal => (&self.num, &other.num, Sign::Positive),
                     Ordering::Greater => (&self.num, &other.num, Sign::Negative),
                 };
 
-                (sub_big_digits(m, a), s)
+                (big_digit::sub(m, a), s)
             }
 
             // Negative minus Positive.
             (Sign::Negative, Sign::Positive) => {
-                (add_big_digits(&self.num, &other.num), Sign::Negative)
+                (big_digit::add(&self.num, &other.num), Sign::Negative)
             }
 
             // Positive minus Negative.
             (Sign::Positive, Sign::Negative) => {
-                (add_big_digits(&self.num, &other.num), Sign::Positive)
+                (big_digit::add(&self.num, &other.num), Sign::Positive)
             }
         };
 
@@ -214,24 +205,24 @@ impl Mul for BigNum {
         };
 
         // Multiply the big digits.
-        let num = mul_big_digits(&big.num, &small.num);
+        let num = big_digit::mul(&big.num, &small.num);
 
         BigNum { num, sign }
     }
 }
 
-// impl Div for BigNum {
-//     type Output = BigNum;
-//
-//     fn div(self, other: BigNum) -> BigNum {
-//         let num = div_big_digits(&self.num, &other.num);
-//
-//         BigNum {
-//             num,
-//             sign: Sign::Positive,
-//         }
-//     }
-// }
+impl Div for BigNum {
+    type Output = BigNum;
+
+    fn div(self, other: BigNum) -> BigNum {
+        let num = big_digit::div(self.num, other.num);
+
+        BigNum {
+            num,
+            sign: Sign::Positive,
+        }
+    }
+}
 
 #[cfg(test)]
 mod init_tests {
@@ -878,19 +869,19 @@ mod multiplication_tests {
     }
 }
 
-// #[cfg(test)]
-// mod division_tests {
-//     use super::*;
-//
-//     #[test]
-//     fn divide_num_1() {
-//         let divisor = BigNum::from_dec_str("4");
-//         let dividend = BigNum::from_dec_str("936");
-//
-//         let result = divisor / dividend;
-//         assert_eq!(result, BigNum::from_dec_str("234"))
-//     }
-// }
+#[cfg(test)]
+mod division_tests {
+    use super::*;
+
+    #[test]
+    fn divide_num_1() {
+        let divisor = BigNum::from_dec_str("4");
+        let dividend = BigNum::from_dec_str("936");
+
+        let result = divisor / dividend;
+        assert_eq!(result, BigNum::from_dec_str("234"))
+    }
+}
 
 #[cfg(test)]
 mod random_number_tests {
