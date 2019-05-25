@@ -1,6 +1,6 @@
 use crate::big_digit::{
-    add_big_digits, compare_big_digit, mul_big_digits, remove_leading_zeroes, sub_big_digits,
-    BigDigit, DigitPrimitive,
+    add_big_digits, compare_big_digits, div_big_digits, mul_big_digits, remove_leading_zeroes,
+    sub_big_digits, BigDigit, DigitPrimitive,
 };
 use crate::helper::{compare_num, RADIX};
 use rand::Rng;
@@ -120,7 +120,7 @@ impl Add for BigNum {
 
             // Negative plus Positive.
             (Sign::Negative, Sign::Positive) => {
-                let (n, s) = match compare_big_digit(&self.num, &other.num) {
+                let (n, s) = match compare_big_digits(&self.num, &other.num) {
                     Ordering::Less => (sub_big_digits(&other.num, &self.num), Sign::Positive),
                     Ordering::Equal => (sub_big_digits(&self.num, &other.num), Sign::Positive),
                     Ordering::Greater => (sub_big_digits(&self.num, &other.num), Sign::Negative),
@@ -131,7 +131,7 @@ impl Add for BigNum {
 
             // Positive plus Negative.
             (Sign::Positive, Sign::Negative) => {
-                let (n, s) = match compare_big_digit(&self.num, &other.num) {
+                let (n, s) = match compare_big_digits(&self.num, &other.num) {
                     Ordering::Less => (sub_big_digits(&other.num, &self.num), Sign::Negative),
                     _ => (sub_big_digits(&self.num, &other.num), Sign::Positive),
                 };
@@ -173,7 +173,7 @@ impl Sub for BigNum {
 
             // Two Negatives.
             (Sign::Negative, Sign::Negative) => {
-                let (m, a, s) = match compare_big_digit(&self.num, &other.num) {
+                let (m, a, s) = match compare_big_digits(&self.num, &other.num) {
                     Ordering::Less => (&other.num, &self.num, Sign::Positive),
                     Ordering::Equal => (&self.num, &other.num, Sign::Positive),
                     Ordering::Greater => (&self.num, &other.num, Sign::Negative),
@@ -216,6 +216,19 @@ impl Mul for BigNum {
         let num = mul_big_digits(&big.num, &small.num);
 
         BigNum { num, sign }
+    }
+}
+
+impl Div for BigNum {
+    type Output = BigNum;
+
+    fn div(self, other: BigNum) -> BigNum {
+        let num = div_big_digits(&self.num, &other.num);
+
+        BigNum {
+            num,
+            sign: Sign::Positive,
+        }
     }
 }
 
