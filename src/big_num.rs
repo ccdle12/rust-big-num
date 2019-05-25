@@ -878,6 +878,20 @@ mod multiplication_tests {
 }
 
 #[cfg(test)]
+mod division_tests {
+    use super::*;
+
+    #[test]
+    fn divide_num_1() {
+        let divisor = BigNum::from_dec_str("4");
+        let dividend = BigNum::from_dec_str("936");
+
+        let result = divisor / dividend;
+        assert_eq!(result, BigNum::from_dec_str("234"))
+    }
+}
+
+#[cfg(test)]
 mod random_number_tests {
     use super::*;
 
