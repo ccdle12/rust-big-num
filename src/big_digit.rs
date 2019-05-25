@@ -141,8 +141,8 @@ pub fn mul_big_digits(big: &BigDigit, small: &BigDigit) -> BigDigit {
     sum
 }
 
-/// compare_big_digit is a function that purely comapres BigDigits.
-pub fn compare_big_digit(x: &BigDigit, y: &BigDigit) -> Ordering {
+/// compare_big_digits is a function that purely comapres BigDigits.
+pub fn compare_big_digits(x: &BigDigit, y: &BigDigit) -> Ordering {
     // Compare the lengths.
     let (x_len, y_len) = (x.len(), y.len());
 
