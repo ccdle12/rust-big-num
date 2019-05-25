@@ -6,7 +6,7 @@ use crate::helper::{compare_num, RADIX};
 use rand::Rng;
 use std::cmp::Ordering::{self, Equal};
 use std::fmt;
-use std::ops::{Add, AddAssign, Mul, Sub};
+use std::ops::{Add, AddAssign, Div, Mul, Sub};
 
 /// BigNum is the struct that represents a big number. It holds a BigDigit
 /// (Vec) of bytes and an Enum Sign, to represent a positive or negative number.
