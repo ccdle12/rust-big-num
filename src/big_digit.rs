@@ -7,9 +7,9 @@ pub type DigitPrimitive = u8;
 /// BigDigit is the type used in the BigNum field as a vector of bytes.
 pub type BigDigit = Vec<DigitPrimitive>;
 
-/// big_digit_from_str is a function that will parse a decimal string
+/// from_str is a function that will parse a decimal string
 /// representation and return a BigDigit.
-pub fn big_digit_from_str(dec_str: &str) -> BigDigit {
+pub fn from_str(dec_str: &str) -> BigDigit {
     let mut num: BigDigit = dec_str
         .chars()
         .map(|x| x.to_digit(RADIX).expect("cannot pass non digits") as DigitPrimitive)
@@ -21,10 +21,10 @@ pub fn big_digit_from_str(dec_str: &str) -> BigDigit {
     num
 }
 
-/// add_big_digits is the implementation function to add two BigiDigit types.
+/// add is the implementation function to add two BigiDigit types.
 /// This is helpful because we can separate the implementation with the operator
 /// implementation in big_num.
-pub fn add_big_digits(x: &BigDigit, y: &BigDigit) -> BigDigit {
+pub fn add(x: &BigDigit, y: &BigDigit) -> BigDigit {
     // Initialise the result vec and carry.
     let (mut result, mut carry) = (vec![], 0);
 
@@ -68,9 +68,9 @@ pub fn add_big_digits(x: &BigDigit, y: &BigDigit) -> BigDigit {
     remove_leading_zeroes(result)
 }
 
-/// sub_big_digits is the implementation function to subtract two BigDigit types.
+/// sub is the implementation function to subtract two BigDigit types.
 /// The return is a new instance of a BigDigit.
-pub fn sub_big_digits(minuend: &BigDigit, addend: &BigDigit) -> BigDigit {
+pub fn sub(minuend: &BigDigit, addend: &BigDigit) -> BigDigit {
     let (mut result, mut carry) = (vec![], 0);
 
     // Retrieve the iterators for each BigDigit.
@@ -118,9 +118,9 @@ pub fn sub_big_digits(minuend: &BigDigit, addend: &BigDigit) -> BigDigit {
     remove_leading_zeroes(result)
 }
 
-/// mul_big_digits is the implementation function to multiply two BigDigit types.
+/// mul is the implementation function to multiply two BigDigit types.
 /// The return is a new instance of a BigDigit.
-pub fn mul_big_digits(big: &BigDigit, small: &BigDigit) -> BigDigit {
+pub fn mul(big: &BigDigit, small: &BigDigit) -> BigDigit {
     // Create a vector of the products to add at the end.
     let mut products: Vec<BigDigit> = vec![];
 
@@ -152,68 +152,76 @@ pub fn mul_big_digits(big: &BigDigit, small: &BigDigit) -> BigDigit {
     let mut sum: BigDigit = vec![];
 
     for i in products {
-        sum = add_big_digits(&i, &sum);
+        sum = add(&i, &sum);
     }
 
     sum
 }
 
-/// div_big_digits is the implementation function to divide two BigDigit types.
+/// div is the implementation function to divide two BigDigit types.
 /// The return is a new instance of a BigDigit.
-// pub fn div_big_digits(x: &mut BigDigit, y: &mut BigDigit) -> BigDigit {
-//     First pass:
-//     * Assumes x is one digit.
-//     * Assumes x[0] < y[0]
-//
-//     Space Complexity:
-//     * result
-//     * remainder
-//
-//     Time Complexity:
-//     * Main loop
-//     * Inner Loop
-//     y.reverse();
-//     let divisor = x[0];
-//     let dividend = y;
-//
-//     let mut result: BigDigit = vec![];
-//     let mut remainder: BigDigit = vec![];
-//
-//     i is the index for the dividend y.
-//     let i = 0;
-//     loop {
-//         if i != 0 {
-//             let r = dividend[i] / divisor;
-//             result.push(r);
-//
-//             let rem = divisor * r;
-//             remainder.push(rem);
-//
-//             i += 1;
-//             continue;
-//         }
-//
-//         remainder.push(dividend[i]);
-//
-//         j is an incrementing number to find or "guess" how many times the
-//         divisor can go into the current remainder.
-//         TODO: create a default BigDigit Zero and One.
-//         let j = 0;
-//         let mut r = 0;
-//         while compare_big_digits(&result, &remainder) != Ordering::Less {
-//             let r = divisor * j;
-//         }
-//         let next_result = r - 1;
-//
-//         // TODO: Need to be able to convert small numbers to a BigDigit.
-//         let next_remainder = divisor * next_result;
-//     }
-//
-//     result
-// }
+pub fn div(x: BigDigit, mut y: BigDigit) -> BigDigit {
+    // First pass:
+    // * Assumes x is one digit.
+    // * Assumes x[0] < y[0]
 
-/// compare_big_digits is a function that purely comapres BigDigits.
-pub fn compare_big_digits(x: &BigDigit, y: &BigDigit) -> Ordering {
+    // Space Complexity:
+    // * result
+    // * remainder
+
+    // Time Complexity:
+    // * Main loop
+    // * Inner Loop
+    // let mut dividend = y;
+    // dividend.reverse();
+    // let mut dividend = y;
+    y.reverse();
+    let dividend = y;
+    let divisor = x[0];
+
+    let mut result: BigDigit = vec![];
+    let mut remainder: BigDigit = vec![];
+
+    // i is the index for the dividend y.
+    let mut i = 0;
+    loop {
+        // TODO: If the base case if i > length of dividend; break;
+        //
+        if i != 0 {
+            let r = dividend[i] / divisor;
+            result.push(r);
+
+            let rem = divisor * r;
+            remainder.push(rem);
+
+            i += 1;
+            continue;
+        }
+
+        remainder.push(dividend[i]);
+        // j is an incrementing number to find or "guess" how many times the
+        // divisor can go into the current remainder.
+        // TODO: create a default BigDigit Zero and One.
+        let j = 0;
+        let mut r = 0;
+        while compare(&result, &remainder) != Ordering::Less {
+            r = divisor * j;
+        }
+        let next_result = r - 1;
+
+        // TODO: Need to be able to convert small numbers to a BigDigit.
+        let next_remainder = divisor * next_result;
+        let big_next_remainder = from_str(&next_remainder.to_string());
+        remainder = sub(&remainder, &big_next_remainder);
+
+        i += 1;
+    }
+
+    result
+}
+
+/// compare is a function that purely comapres BigDigits.
+pub fn compare(x: &BigDigit, y: &BigDigit) -> Ordering {
     // Compare the lengths.
     let (x_len, y_len) = (x.len(), y.len());
 
