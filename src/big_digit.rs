@@ -103,6 +103,8 @@ pub fn sub_big_digits(minuend: &BigDigit, addend: &BigDigit) -> BigDigit {
     remove_leading_zeroes(result)
 }
 
+/// mul_big_digits is the implementation function to multiply two BigDigit types.
+/// The return is a new instance of a BigDigit.
 pub fn mul_big_digits(big: &BigDigit, small: &BigDigit) -> BigDigit {
     // Create a vector of the products to add at the end.
     let mut products: Vec<BigDigit> = vec![];
