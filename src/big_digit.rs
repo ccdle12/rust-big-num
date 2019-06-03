@@ -172,9 +172,6 @@ pub fn div(x: BigDigit, mut y: BigDigit) -> BigDigit {
     // Time Complexity:
     // * Main loop
     // * Inner Loop
-    // let mut dividend = y;
-    // dividend.reverse();
-    // let mut dividend = y;
     y.reverse();
     let dividend = y;
     let divisor = x[0];
@@ -182,12 +179,19 @@ pub fn div(x: BigDigit, mut y: BigDigit) -> BigDigit {
     let mut result: BigDigit = vec![];
     let mut remainder: BigDigit = vec![];
 
+    // TEMP: x is the top number in the long division algo.
+    let mut x: BigDigit = vec![];
+    let mut next_remainder: BigDigit = vec![];
+
     // i is the index for the dividend y.
     let mut i = 0;
     loop {
-        // TODO: If the base case if i > length of dividend; break;
-        //
-        if i != 0 {
+        if i >= dividend.len() {
+            break;
+        }
+
+        // ONLY exectued on the first iteration.
+        if i == 0 {
             let r = dividend[i] / divisor;
             result.push(r);
 
@@ -198,21 +202,33 @@ pub fn div(x: BigDigit, mut y: BigDigit) -> BigDigit {
             continue;
         }
 
-        remainder.push(dividend[i]);
+        // TODO: We need to subtract the dividend[i] by the remainder.
+        if i == 1 {
+            x = from_str(&dividend[i - 1].to_string());
+            next_remainder = sub(&x, &remainder);
+        }
+
+        // Add the next dividend to the remainder.
+        remainder = vec![];
+        next_remainder.iter().for_each(|x| remainder.push(*x));
+        remainder.insert(0, dividend[i]);
+
+        // STAGE 7. Guess how many times the divisor goes into the remainder.
         // j is an incrementing number to find or "guess" how many times the
         // divisor can go into the current remainder.
+        //
         // TODO: create a default BigDigit Zero and One.
-        let j = 0;
-        let mut r = 0;
-        while compare(&result, &remainder) != Ordering::Less {
-            r = divisor * j;
-        }
-        let next_result = r - 1;
+        let mut guess: BigDigit = vec![0];
+        let mut temp_result: BigDigit = vec![0];
+        let big_divisor: BigDigit = vec![divisor];
 
-        // TODO: Need to be able to convert small numbers to a BigDigit.
-        let next_remainder = divisor * next_result;
-        let big_next_remainder = from_str(&next_remainder.to_string());
-        remainder = sub(&remainder, &big_next_remainder);
+        while compare(&temp_result, &remainder) != Ordering::Greater {
+            guess = add(&guess, &from_str("1"));
+            temp_result = mul(&guess, &big_divisor);
+        }
+
+        guess = sub(&guess, &from_str("1"));
+        result.insert(0, guess[0]);
 
         i += 1;
     }
