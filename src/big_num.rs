@@ -215,7 +215,8 @@ impl Div for BigNum {
     type Output = BigNum;
 
     fn div(self, other: BigNum) -> BigNum {
-        let num = big_digit::div(self.num, other.num);
+        let mut num = big_digit::div(self.num, other.num);
+        num = big_digit::remove_leading_zeroes(num);
 
         BigNum {
             num,
@@ -881,6 +882,36 @@ mod division_tests {
         let result = divisor / dividend;
         assert_eq!(result, BigNum::from_dec_str("234"))
     }
+
+    #[test]
+    fn divide_num_2() {
+        let divisor = BigNum::from_dec_str("4");
+        let dividend = BigNum::from_dec_str("9368");
+
+        let result = divisor / dividend;
+        assert_eq!(result, BigNum::from_dec_str("2342"))
+    }
+
+    #[test]
+    fn divide_num_3() {
+        let divisor = BigNum::from_dec_str("6");
+        let dividend = BigNum::from_dec_str("438");
+
+        let result = divisor / dividend;
+        assert_eq!(result, BigNum::from_dec_str("73"))
+    }
+
+    // TODO: Run time is too long.
+    // The "guess" loop is inefficient.
+    // Look to shifting to reduce the time.
+    // #[test]
+    // fn divide_num_4() {
+    //     let divisor = BigNum::from_dec_str("2");
+    //     let dividend = BigNum::from_dec_str("682345923452");
+    //
+    //     let result = divisor / dividend;
+    //     assert_eq!(result, BigNum::from_dec_str("341172961726"))
+    // }
 }
 
 #[cfg(test)]
