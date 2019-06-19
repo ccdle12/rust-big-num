@@ -177,14 +177,13 @@ pub fn div(x: BigDigit, mut y: BigDigit) -> BigDigit {
     let divisor = x[0];
 
     let mut result: BigDigit = vec![];
-    let mut remainder: BigDigit = vec![];
 
-    // TEMP: x is the top number in the long division algo.
-    let mut x: BigDigit = vec![];
-    let mut next_remainder: BigDigit = vec![];
+    let mut top_carry: BigDigit = vec![];
+    let mut bottom_carry: BigDigit = vec![];
 
     // i is the index for the dividend y.
     let mut i = 0;
+    let mut j = 0;
     loop {
         if i >= dividend.len() {
             break;
@@ -195,42 +194,61 @@ pub fn div(x: BigDigit, mut y: BigDigit) -> BigDigit {
             let r = dividend[i] / divisor;
             result.push(r);
 
-            let rem = divisor * r;
-            remainder.push(rem);
+            let temp_bottom_carry = divisor * r;
+            bottom_carry.push(temp_bottom_carry);
 
             i += 1;
             continue;
         }
 
         // TODO: We need to subtract the dividend[i] by the remainder.
+        // I think the problem is here, we need to always shift the
+        // "top carry" and
+        // "bottom carry"
         if i == 1 {
-            x = from_str(&dividend[i - 1].to_string());
-            next_remainder = sub(&x, &remainder);
+            top_carry = from_str(&dividend[i - 1].to_string());
+            println!("TOP CARRY: {:?}", &top_carry);
+            println!("BOTTOM CARRY before sub on first iter: {:?}", &bottom_carry);
+            top_carry = sub(&top_carry, &bottom_carry);
+            println!("TOP CARRY: {:?}", &top_carry);
+        } else {
+            let big_divisor: BigDigit = vec![divisor];
+            let result_digit: BigDigit = vec![result[j]];
+            bottom_carry = mul(&big_divisor, &result_digit);
+            println!("TOP CARRY: {:?}", &top_carry);
+            println!("BOTTOM CARRY: {:?}", &bottom_carry);
+
+            // TEMP: used for iterating the next result digit.
+            j += 1;
         }
 
-        // Add the next dividend to the remainder.
-        remainder = vec![];
-        next_remainder.iter().for_each(|x| remainder.push(*x));
-        remainder.insert(0, dividend[i]);
+        // Bring down the next number in the dividend.
+        top_carry.insert(0, dividend[i]);
+        println!(
+            "TOP CARRY: after brining down the next dividend {:?}",
+            &top_carry
+        );
 
-        // STAGE 7. Guess how many times the divisor goes into the remainder.
-        // j is an incrementing number to find or "guess" how many times the
-        // divisor can go into the current remainder.
-        //
-        // TODO: create a default BigDigit Zero and One.
+        // Guess how many times the divisor goes into the dividend.
+        // NEED to improve the time complexity.
         let mut guess: BigDigit = vec![0];
         let mut temp_result: BigDigit = vec![0];
         let big_divisor: BigDigit = vec![divisor];
 
-        while compare(&temp_result, &remainder) != Ordering::Greater {
+        while compare(&temp_result, &top_carry) != Ordering::Greater {
             guess = add(&guess, &from_str("1"));
             temp_result = mul(&guess, &big_divisor);
+            println!("Temp Result: {:?}", &temp_result);
+            println!("Top Carry: {:?}", &top_carry);
+            println!("Number of Guesses: {:?}", guess);
+            println!("-----------------------------------------------");
         }
 
         guess = sub(&guess, &from_str("1"));
         result.insert(0, guess[0]);
 
         i += 1;
+        println!("-----------------------------------------------");
     }
 
     result
