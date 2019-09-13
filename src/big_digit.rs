@@ -161,97 +161,21 @@ pub fn mul(big: &BigDigit, small: &BigDigit) -> BigDigit {
 /// div is the implementation function to divide two BigDigit types.
 /// The return is a new instance of a BigDigit.
 pub fn div(x: BigDigit, mut y: BigDigit) -> BigDigit {
-    // First pass:
-    // * Assumes x is one digit.
-    // * Assumes x[0] < y[0]
+    let (mut dividend, mut divisor) = (x, y);
+    let mut quotient = from_str("0");
 
-    // Space Complexity:
-    // * result
-    // * remainder
-
-    // Time Complexity:
-    // * Main loop
-    // * Inner Loop
-    y.reverse();
-    let dividend = y;
-    let divisor = x[0];
-
-    let mut result: BigDigit = vec![];
-
-    let mut top_carry: BigDigit = vec![];
-    let mut bottom_carry: BigDigit = vec![];
-
-    // i is the index for the dividend y.
-    let mut i = 0;
-    let mut j = 0;
+    println!("Dividend: {:?}", &dividend);
     loop {
-        if i >= dividend.len() {
-            break;
+        match compare(&divisor, &dividend) {
+            Ordering::Greater | Ordering::Equal => {
+                quotient = add(&quotient, &from_str("1"));
+                divisor = sub(&divisor, &dividend);
+            }
+            _ => break,
         }
-
-        // ONLY exectued on the first iteration.
-        if i == 0 {
-            let r = dividend[i] / divisor;
-            result.push(r);
-
-            let temp_bottom_carry = divisor * r;
-            bottom_carry.push(temp_bottom_carry);
-
-            i += 1;
-            continue;
-        }
-
-        // TODO: We need to subtract the dividend[i] by the remainder.
-        // I think the problem is here, we need to always shift the
-        // "top carry" and
-        // "bottom carry"
-        if i == 1 {
-            top_carry = from_str(&dividend[i - 1].to_string());
-            println!("TOP CARRY: {:?}", &top_carry);
-            println!("BOTTOM CARRY before sub on first iter: {:?}", &bottom_carry);
-            top_carry = sub(&top_carry, &bottom_carry);
-            println!("TOP CARRY: {:?}", &top_carry);
-        } else {
-            let big_divisor: BigDigit = vec![divisor];
-            let result_digit: BigDigit = vec![result[j]];
-            bottom_carry = mul(&big_divisor, &result_digit);
-            println!("TOP CARRY: {:?}", &top_carry);
-            println!("BOTTOM CARRY: {:?}", &bottom_carry);
-
-            // TEMP: used for iterating the next result digit.
-            j += 1;
-        }
-
-        // Bring down the next number in the dividend.
-        top_carry.insert(0, dividend[i]);
-        println!(
-            "TOP CARRY: after brining down the next dividend {:?}",
-            &top_carry
-        );
-
-        // Guess how many times the divisor goes into the dividend.
-        // NEED to improve the time complexity.
-        let mut guess: BigDigit = vec![0];
-        let mut temp_result: BigDigit = vec![0];
-        let big_divisor: BigDigit = vec![divisor];
-
-        while compare(&temp_result, &top_carry) != Ordering::Greater {
-            guess = add(&guess, &from_str("1"));
-            temp_result = mul(&guess, &big_divisor);
-            println!("Temp Result: {:?}", &temp_result);
-            println!("Top Carry: {:?}", &top_carry);
-            println!("Number of Guesses: {:?}", guess);
-            println!("-----------------------------------------------");
-        }
-
-        guess = sub(&guess, &from_str("1"));
-        result.insert(0, guess[0]);
-
-        i += 1;
-        println!("-----------------------------------------------");
     }
 
-    result
+    quotient
 }
 
 /// compare is a function that purely comapres BigDigits.

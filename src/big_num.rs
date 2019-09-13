@@ -904,14 +904,14 @@ mod division_tests {
     // TODO: Run time is too long.
     // The "guess" loop is inefficient.
     // Look to shifting to reduce the time.
-    // #[test]
-    // fn divide_num_4() {
-    //     let divisor = BigNum::from_dec_str("2");
-    //     let dividend = BigNum::from_dec_str("682345923452");
-    //
-    //     let result = divisor / dividend;
-    //     assert_eq!(result, BigNum::from_dec_str("341172961726"))
-    // }
+    #[test]
+    fn divide_num_4() {
+        let divisor = BigNum::from_dec_str("2");
+        let dividend = BigNum::from_dec_str("682345923452");
+
+        let result = divisor / dividend;
+        assert_eq!(result, BigNum::from_dec_str("341172961726"))
+    }
 }
 
 #[cfg(test)]
